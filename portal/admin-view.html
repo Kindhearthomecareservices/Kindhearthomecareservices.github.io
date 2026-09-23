@@ -1,164 +1,32 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KindHeart Admin - Command Centre V3.1</title>
+<title>KindHeart Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--teal:#0f4a5a;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--bg:#f7f8f5}
-*{font-family:Inter,system-ui;box-sizing:border-box}
-body{margin:0;background:var(--bg);padding-bottom:90px}
-.top{background:var(--teal);color:#fff;padding:12px 14px;display:flex;gap:12px;align-items:center;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px #0002}
-.top img{width:46px;height:46px;background:#fff;border-radius:12px;padding:5px;object-fit:contain;box-shadow:0 2px 6px #0002}
-.card{background:#fff;border-radius:16px;padding:14px;margin:10px 4px;box-shadow:0 2px 10px #0001;border:1px solid #e5e7eb}
-.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px}
-.kpi.c{background:#fff;border-radius:16px;padding:14px;border-left:4px solid var(--green);box-shadow:0 2px 6px #0001}
+:root{--teal:#0f4a5a;--green:#22c55e;--bg:#f7f8f5}
+*{font-family:Inter,system-ui;box-sizing:border-box}body{margin:0;background:var(--bg);padding-bottom:90px}
+.top{background:var(--teal);color:#fff;padding:12px 14px;display:flex;gap:12px;align-items:center;position:sticky;top:0;z-index:20}
+.top img{width:46px;height:46px;background:#fff;border-radius:12px;padding:5px;object-fit:contain}
+.card{background:#fff;border-radius:16px;padding:14px;margin:10px 6px;box-shadow:0 2px 10px #0001;border:1px solid #e5e7eb}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px}.kpi .c{background:#fff;border-radius:16px;padding:14px;border-left:4px solid var(--green)}
 .page{display:none}.page.active{display:block}
 .bottomNav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #e5e7eb;z-index:30}
-.tabBtn{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#667085;cursor:pointer}.tabBtn.active{color:var(--teal);font-weight:800;border-top:2px solid var(--teal)}
+.tabBtn{flex:1;text-align:center;padding:9px 2px;font-size:11px;color:#667085;cursor:pointer}.tabBtn.active{color:var(--teal);font-weight:800;border-top:2px solid var(--teal)}
 .item{display:flex;justify-content:space-between;align-items:center;padding:11px;border-bottom:1px solid #f2f4f7}
 input,select,textarea{width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;margin:5px 0;font-size:14px}
-button{padding:10px 14px;border:0;border-radius:10px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer}
-button.green{background:var(--green)}button.ghost{background:#f3f4f6;color:#111}
+button{padding:10px 14px;border:0;border-radius:10px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer}button.green{background:var(--green)}button.ghost{background:#f3f4f6;color:#111}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
 .modal{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;z-index:50;padding:12px}.modal.show{display:flex}
 .modalBox{background:#fff;width:100%;max-width:700px;border-radius:18px;padding:16px;max-height:92vh;overflow:auto}
 .medForm{background:#f0fdf4;padding:12px;border-radius:12px;border:2px dashed #22c55e;margin:8px 0}
-.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#eef6ee}
-small.muted{color:#667085}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 </head><body>
-<div class="top">
-<img src="logo.png" alt="KindHeart Logo">
-<div><b>KINDHEART HOMECARE</b><br><small>Command Centre V3.1 • Medications Direct Write</small></div>
-<div style="margin-left:auto;text-align:right"><small id="todayDate"></small><br><button onclick="loadAll()" style="padding:7px 14px;background:#fff;color:#0f4a5a;border-radius:10px;margin-top:4px;font-weight:800">Refresh</button></div>
-</div>
-<div id="p-dashboard" class="page active">
-<div class="kpi"><div class="c"><small>Active Patients</small><b id="kPatients" style="font-size:26px">0</b></div><div class="c"><small>Active Nurses</small><b id="kNurses" style="font-size:26px">0</b></div><div class="c" style="border-left-color:var(--amber)"><small>Today's Visits</small><b id="kVisits" style="font-size:26px">0</b></div><div class="c" style="border-left-color:var(--red)"><small>Alerts</small><b id="kAlerts" style="font-size:26px">0</b></div></div>
-<div class="card"><h3>What needs attention today</h3><div id="attentionList">Loading...</div></div>
-<div class="card"><h3>Recent Timeline</h3><div id="recentTimeline">Loading...</div></div>
-</div>
-<div id="p-patients" class="page"><div class="card"><div class="row"><h3 style="flex:1">Patients</h3><button onclick="openAddPatient()">+ ADD PATIENT</button></div><input id="searchPatients" placeholder="Search by name..." oninput="loadPatients()"><div id="listPatients" style="margin-top:8px"></div></div></div>
-<div id="p-careplans" class="page">
-<div class="card">
-<div class="row"><h3 style="flex:1">Care Plans & Medications</h3><button class="green" onclick="openDirectMedWrite()">+ WRITE MEDICATIONS</button></div>
-<small class="muted">You can now write medications directly here - pick patient, add drug, dose, frequency, times, duration</small>
-<div id="listCarePlans" style="margin-top:10px"></div>
-</div>
-</div>
-<div id="p-nurses" class="page"><div class="card"><h3>Nurses</h3><div class="row"><input id="sname" placeholder="Nurse full name"><button onclick="addNurse()">Add Nurse</button></div><div id="listNurses" style="margin-top:8px"></div><h3 style="margin-top:16px">Active Assignments</h3><div id="listAssignments"></div></div></div>
-<div id="p-visits" class="page"><div class="card"><h3>Today's Visits - Live Progress</h3><div class="row"><input type="date" id="visitDate" onchange="loadVisits()"><button onclick="generateTodayVisits()" class="green">Generate Today's Visits</button></div><div id="listVisits" style="margin-top:10px"></div></div></div>
+<div class="top"><img src="logo.png" alt="Logo"><div><b>KINDHEART HOMECARE</b></div><div style="margin-left:auto;text-align:right"><small id="todayDate"></small><br><button onclick="loadAll()" style="padding:7px 14px;background:#fff;color:#0f4a5a;border-radius:10px;margin-top:4px;font-weight:800">Refresh</button></div></div>
+<div id="p-dashboard" class="page active"><div class="kpi"><div class="c"><small>Active Patients</small><b id="kPatients" style="font-size:26px">0</b></div><div class="c"><small>Active Nurses</small><b id="kNurses" style="font-size:26px">0</b></div><div class="c" style="border-left-color:#f59e0b"><small>Today's Visits</small><b id="kVisits" style="font-size:26px">0</b></div><div class="c" style="border-left-color:#ef4444"><small>Alerts</small><b id="kAlerts" style="font-size:26px">0</b></div></div><div class="card"><h3>What needs attention</h3><div id="attentionList">Loading...</div></div><div class="card"><h3>Recent Timeline</h3><div id="recentTimeline">Loading...</div></div></div>
+<div id="p-patients" class="page"><div class="card"><div class="row"><h3 style="flex:1">Patients</h3><button onclick="openAddPatient()">+ ADD PATIENT</button></div><input id="searchPatients" placeholder="Search by name..." oninput="loadPatients()"><div id="listPatients"></div></div></div>
+<div id="p-careplans" class="page"><div class="card"><div class="row"><h3 style="flex:1">Care Plans & Medications</h3><button class="green" onclick="openDirectMedWrite()">+ WRITE MEDICATIONS</button></div><small>Pick patient, add drug, dose, times - multiple allowed</small><div id="listCarePlans" style="margin-top:10px"></div></div></div>
+<div id="p-nurses" class="page"><div class="card"><h3>Nurses</h3><div class="row"><input id="sname" placeholder="Nurse name"><button onclick="addNurse()">Add</button></div><div id="listNurses"></div><h3 style="margin-top:12px">Assignments</h3><div id="listAssignments"></div></div></div>
+<div id="p-visits" class="page"><div class="card"><h3>Today's Visits</h3><div class="row"><input type="date" id="visitDate" onchange="loadVisits()"><button onclick="generateTodayVisits()" class="green">Generate</button></div><div id="listVisits"></div></div></div>
 <div id="p-alerts" class="page"><div class="card"><h3>Alerts</h3><div id="listAlerts"></div></div></div>
-<div class="bottomNav">
-<div class="tabBtn active" onclick="switchTab('p-dashboard',this)">Dash</div>
-<div class="tabBtn" onclick="switchTab('p-patients',this)">Patients</div>
-<div class="tabBtn" onclick="switchTab('p-careplans',this)">Plans</div>
-<div class="tabBtn" onclick="switchTab('p-nurses',this)">Nurses</div>
-<div class="tabBtn" onclick="switchTab('p-visits',this)">Visits</div>
-<div class="tabBtn" onclick="switchTab('p-alerts',this)">Alerts</div>
-</div> <div id="modalPatient" class="modal"><div class="modalBox"><h3>Add Patient - Step 1/4</h3>
-<input id="f_name" placeholder="Full Name *"><div class="row"><input id="f_age" type="number" placeholder="Age"><input id="f_gender" placeholder="Gender"><input id="f_phone" placeholder="Phone"></div>
-<input id="f_location" placeholder="Home Location *"><div class="row"><input id="f_emName" placeholder="Emergency Contact"><input id="f_emPhone" placeholder="Emergency Phone"></div>
-<div class="row"><input id="f_nokName" placeholder="Next of Kin"><input id="f_nokPhone" placeholder="NOK Phone"></div>
-<input id="f_hospital" placeholder="Hospital"><div class="row"><input id="f_adm" type="date"><input id="f_dis" type="date"></div>
-<textarea id="f_diag" placeholder="Diagnosis"></textarea><div class="row"><input id="f_allergy" placeholder="Allergies"><input id="f_history" placeholder="Medical History"></div>
-<div class="row"><button class="ghost" onclick="closeModals()">Cancel</button><button onclick="savePatient()">Save & Care Plan</button></div>
-<div id="patientMsg" style="font-size:12px;color:#ef4444;margin-top:6px"></div>
-</div></div>
-<div id="modalCarePlan" class="modal"><div class="modalBox"><h3>Create Care Plan - Step 2/4</h3><p id="cpPatientName" class="muted"></p>
-<div class="row"><select id="cp_type"><option>Home Nursing</option><option>Elderly Care</option><option>Post-Surgery</option><option>Palliative</option></select><select id="cp_freq"><option>Daily</option><option>Twice Daily</option><option>Weekly</option></select></div>
-<div class="row"><input id="cp_start" type="date"><input id="cp_shiftS" type="time" value="08:00"><input id="cp_shiftE" type="time" value="18:00"></div>
-<div id="careNeedsChecks" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0"></div>
-<textarea id="cp_notes" placeholder="Notes"></textarea>
-<div class="row"><button class="ghost" onclick="closeModals()">Skip</button><button onclick="saveCarePlan()">Save & Treatment Sheet</button></div>
-</div></div>
-<div id="modalTasks" class="modal"><div class="modalBox"><h3>Treatment Sheet - Step 3/4</h3><p id="taskPatientName" class="muted"></p>
-<h4>General Tasks</h4><div id="taskList"></div>
-<div class="card" style="background:#f9fafb"><div class="row"><input id="t_time" type="time" value="08:00"><input id="t_title" placeholder="Task title"></div><div class="row"><select id="t_cat"><option value="vitals">Vitals</option><option value="feeding">Feeding</option><option value="wound_care">Wound Care</option><option value="exercise">Exercise</option><option value="hygiene">Hygiene</option><option value="mobility">Mobility</option><option value="other">Other</option></select></div><input id="t_instr" placeholder="Instructions"><button onclick="addTask()" class="green" style="width:100%;margin-top:6px">+ Add Task</button></div>
-<h4 style="margin-top:16px">Medications - Write Multiple</h4><div id="medsList"></div>
-<div class="medForm">
-<b>+ Write Medication</b>
-<div class="row"><input id="m_drug" placeholder="Drug Name *"><input id="m_dose" placeholder="Dose *"></div>
-<div class="row"><select id="m_route"><option>Oral</option><option>IV</option><option>IM</option><option>Topical</option></select><select id="m_freq"><option>OD - Once Daily</option><option>BD - Twice Daily</option><option>TDS - 3x Daily</option><option>QID - 4x Daily</option><option>PRN</option></select></div>
-<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0" id="m_times_checks">
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="06:00"> 06:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="08:00" checked> 08:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="12:00"> 12:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="14:00"> 14:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="18:00"> 18:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="20:00"> 20:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="22:00"> 22:00</label>
-</div>
-<div class="row"><input id="m_duration" placeholder="Duration e.g 7 days"><input id="m_start" type="date"></div>
-<input id="m_instr" placeholder="Instructions">
-<button onclick="addMedication()" class="green" style="width:100%;margin-top:8px">+ ADD THIS MEDICATION</button>
-<div id="medMsg" style="font-size:12px;margin-top:6px"></div>
-</div>
-<div class="row" style="margin-top:12px"><button class="ghost" onclick="closeModals()">Done</button><button onclick="openAssignFromTasks()">Assign Nurse</button></div>
-</div></div>
-<div id="modalDirectMeds" class="modal"><div class="modalBox"><h3>Write Medications Directly</h3><p class="muted">Pick patient - Write drugs - Multiple allowed</p>
-<select id="directPatientSel" onchange="loadDirectPatientMeds()"></select>
-<div id="directPatientMeds" style="margin:10px 0"></div>
-<div class="medForm">
-<b>+ New Medication</b>
-<div class="row"><input id="dm_drug" placeholder="Drug Name *"><input id="dm_dose" placeholder="Dose *"></div>
-<div class="row"><select id="dm_route"><option>Oral</option><option>IV</option><option>IM</option><option>Topical</option></select><select id="dm_freq"><option>OD - Once Daily</option><option>BD - Twice Daily</option><option>TDS - 3x Daily</option><option>QID - 4x Daily</option><option>PRN</option></select></div>
-<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0" id="dm_times">
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="06:00"> 06:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="08:00" checked> 08:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="12:00"> 12:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="14:00"> 14:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="18:00"> 18:00</label>
-<label style="background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" value="20:00"> 20:00</label>
-</div>
-<div class="row"><input id="dm_duration" placeholder="Duration"><input id="dm_start" type="date"></div>
-<input id="dm_instr" placeholder="Instructions">
-<button onclick="addDirectMed()" class="green" style="width:100%;margin-top:8px">+ ADD MEDICATION</button>
-<div id="dmMsg" style="font-size:12px;margin-top:6px"></div>
-</div>
-<button class="ghost" onclick="closeModals()" style="margin-top:10px">Close</button>
-</div></div>
-<div id="modalAssign" class="modal"><div class="modalBox"><h3>Assign Nurse</h3><p id="assignPatientName"></p><select id="assignNurseSel"></select><div class="row"><input id="assignStart" type="date"><input id="assignShiftS" type="time" value="08:00"><input id="assignShiftE" type="time" value="18:00"></div><select id="assignCareType"><option>Home Nursing</option><option>Elderly Care</option></select><button onclick="saveAssignment()">ASSIGN</button></div></div>
-<div id="modalViewPatient" class="modal"><div class="modalBox" style="max-width:780px"><h3 id="viewPatientTitle">Timeline</h3><div id="viewPatientBody"></div><button class="ghost" onclick="closeModals()">Close</button></div></div>
-<script>
-const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
-const SB_KEY="PASTE_ANON_KEY_HERE";
-const supa=supabase.createClient(SB_URL,SB_KEY);
-let curPatient=null, curCarePlan=null, allPatients=[];
-function switchTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));el.classList.add('active'); if(id==='p-visits')loadVisits(); if(id==='p-careplans')loadCarePlans(); if(id==='p-alerts')loadAlerts(); if(id==='p-dashboard')loadDashboard();}
-function closeModals(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'))}
-function makeId(){return 'KH-'+Math.random().toString(36).slice(2,7).toUpperCase()}
-function openAddPatient(){document.getElementById('modalPatient').classList.add('show')}
-async function savePatient(){let name=document.getElementById('f_name').value.trim();if(!name){document.getElementById('patientMsg').innerText='Name required';return}let payload={patient_id:makeId(),full_name:name,age:document.getElementById('f_age').value||null,gender:document.getElementById('f_gender').value,phone:document.getElementById('f_phone').value,location:document.getElementById('f_location').value||'Not set',emergency_contact_name:document.getElementById('f_emName').value,emergency_contact_phone:document.getElementById('f_emPhone').value,next_of_kin_name:document.getElementById('f_nokName').value,next_of_kin_phone:document.getElementById('f_nokPhone').value,hospital_name:document.getElementById('f_hospital').value,admission_date:document.getElementById('f_adm').value||null,discharge_date:document.getElementById('f_dis').value||null,diagnosis:document.getElementById('f_diag').value,allergies:document.getElementById('f_allergy').value,medical_history:document.getElementById('f_history').value,status:'Active'};let {data,error}=await supa.from('patients').insert([payload]).select().single();if(error){document.getElementById('patientMsg').innerHTML='Invalid: '+error.message;return}curPatient=data;closeModals();openCarePlan(data);loadAll();}
-function openCarePlan(patient){curPatient=patient;document.getElementById('cpPatientName').innerText='Patient: '+patient.full_name;document.getElementById('cp_start').value=new Date().toISOString().split('T')[0];let needs=[['need_medication','Medication'],['need_vitals','Vitals'],['need_wound_care','Wound'],['need_hygiene','Hygiene'],['need_feeding','Feeding'],['need_mobility','Mobility']];document.getElementById('careNeedsChecks').innerHTML=needs.map(([k,l])=>`<label style="background:#f9fafb;padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb"><input type="checkbox" id="${k}"> ${l}</label>`).join('');document.getElementById('modalCarePlan').classList.add('show');}
-async function saveCarePlan(){let payload={patient_id:curPatient.id,care_type:document.getElementById('cp_type').value,care_frequency:document.getElementById('cp_freq').value,start_date:document.getElementById('cp_start').value||new Date().toISOString().split('T')[0],shift_start:document.getElementById('cp_shiftS').value,shift_end:document.getElementById('cp_shiftE').value,notes:document.getElementById('cp_notes').value};['need_medication','need_vitals','need_wound_care','need_hygiene','need_feeding','need_mobility'].forEach(k=>{payload[k]=document.getElementById(k)?.checked||false});let {data,error}=await supa.from('care_plans').insert([payload]).select().single();if(error){alert(error.message);return}curCarePlan=data;closeModals();openTasks(data,curPatient);}
-function openTasks(plan,patient){curCarePlan=plan;curPatient=patient;document.getElementById('taskPatientName').innerText=patient.full_name;loadTasksForPlan(plan.id);loadMedsForPlan(patient.id);document.getElementById('modalTasks').classList.add('show');}
-async function loadTasksForPlan(planId){let {data}=await supa.from('treatment_tasks').select('*').eq('care_plan_id',planId).order('task_time');document.getElementById('taskList').innerHTML=(data||[]).map(t=>`<div class="item"><div><b>${t.task_time.slice(0,5)}</b> ${t.title}</div><button onclick="delTask('${t.id}')" style="background:#ef4444;padding:6px 10px;width:auto">x</button></div>`).join('')||'<small>No tasks</small>';}
-async function loadMedsForPlan(patientId){let {data}=await supa.from('medications').select('*').eq('patient_id',patientId).eq('is_active',true).order('created_at');document.getElementById('medsList').innerHTML=(data||[]).map(m=>`<div class="item"><div><b>${m.drug_name} ${m.dose}</b> ${m.frequency}<br><small>${(m.times||[]).join(', ')} • ${m.duration||''}</small></div><button onclick="delMed('${m.id}')" style="background:#ef4444;padding:6px 10px;width:auto">x</button></div>`).join('')||'<small>No meds</small>';}
-async function addTask(){let payload={care_plan_id:curCarePlan.id,patient_id:curPatient.id,task_time:document.getElementById('t_time').value,title:document.getElementById('t_title').value,category:document.getElementById('t_cat').value,instructions:document.getElementById('t_instr').value};if(!payload.title)return alert('Title');await supa.from('treatment_tasks').insert([payload]);document.getElementById('t_title').value='';loadTasksForPlan(curCarePlan.id);}
-async function delTask(id){await supa.from('treatment_tasks').delete().eq('id',id);loadTasksForPlan(curCarePlan.id);}
-async function addMedication(){let drug=document.getElementById('m_drug').value.trim(); let dose=document.getElementById('m_dose').value.trim();if(!drug||!dose){document.getElementById('medMsg').innerText='Drug and Dose required';return}let times=[];document.querySelectorAll('#m_times_checks input:checked').forEach(c=>times.push(c.value));if(!times.length)times=['08:00'];let payload={patient_id:curPatient.id, care_plan_id:curCarePlan.id, drug_name:drug, dose:dose, route:document.getElementById('m_route').value, frequency:document.getElementById('m_freq').value, times:times, duration:document.getElementById('m_duration').value, start_date:document.getElementById('m_start').value||new Date().toISOString().split('T')[0], instructions:document.getElementById('m_instr').value, is_active:true};let {error}=await supa.from('medications').insert([payload]);if(error){document.getElementById('medMsg').innerText=error.message;return}document.getElementById('medMsg').innerText='Added '+drug;document.getElementById('m_drug').value='';document.getElementById('m_dose').value='';loadMedsForPlan(curPatient.id);}
-async function delMed(id){await supa.from('medications').delete().eq('id',id);loadMedsForPlan(curPatient.id);}
-async function openDirectMedWrite(){let {data:patients}=await supa.from('patients').select('*').order('full_name');if(!patients||!patients.length){alert('No patients - Add patient first');return}allPatients=patients;document.getElementById('directPatientSel').innerHTML=patients.map(p=>`<option value="${p.id}">${p.full_name} - ${p.patient_id}</option>`).join('');document.getElementById('modalDirectMeds').classList.add('show');loadDirectPatientMeds();}
-async function loadDirectPatientMeds(){let pid=document.getElementById('directPatientSel').value;let {data:meds}=await supa.from('medications').select('*').eq('patient_id',pid).eq('is_active',true).order('created_at');document.getElementById('directPatientMeds').innerHTML=(meds||[]).map(m=>`<div class="item"><div><b>${m.drug_name} ${m.dose}</b> ${m.frequency}<br><small>${(m.times||[]).join(', ')} • ${m.duration||''}</small></div><button onclick="delDirectMed('${m.id}')" style="background:#ef4444;padding:6px 10px;width:auto">x</button></div>`).join('')||'<small>No medications</small>';}
-async function addDirectMed(){let pid=document.getElementById('directPatientSel').value;let drug=document.getElementById('dm_drug').value.trim(); let dose=document.getElementById('dm_dose').value.trim();if(!drug||!dose){document.getElementById('dmMsg').innerText='Drug and Dose required';return}let times=[];document.querySelectorAll('#dm_times input:checked').forEach(c=>times.push(c.value));if(!times.length)times=['08:00'];let {data:cp}=await supa.from('care_plans').select('id').eq('patient_id',pid).maybeSingle();let payload={patient_id:pid, care_plan_id:cp?.id||null, drug_name:drug, dose:dose, route:document.getElementById('dm_route').value, frequency:document.getElementById('dm_freq').value, times:times, duration:document.getElementById('dm_duration').value, start_date:document.getElementById('dm_start').value||new Date().toISOString().split('T')[0], instructions:document.getElementById('dm_instr').value, is_active:true};let {error}=await supa.from('medications').insert([payload]);if(error){document.getElementById('dmMsg').innerText=error.message;return}document.getElementById('dmMsg').innerText='Added '+drug;document.getElementById('dm_drug').value='';document.getElementById('dm_dose').value='';loadDirectPatientMeds();loadCarePlans();}
-async function delDirectMed(id){await supa.from('medications').delete().eq('id',id);loadDirectPatientMeds();loadCarePlans();}
-function openAssignFromTasks(){closeModals();openAssign(curPatient);}
-function openAssign(patient){curPatient=patient;document.getElementById('assignPatientName').innerText=patient.full_name;document.getElementById('assignStart').value=new Date().toISOString().split('T')[0];supa.from('nurses').select('*').then(({data})=>{document.getElementById('assignNurseSel').innerHTML=(data||[]).map(n=>`<option value="${n.id}">${n.full_name}</option>`).join('')});document.getElementById('modalAssign').classList.add('show');}
-async function saveAssignment(){let payload={patient_id:curPatient.id,nurse_id:document.getElementById('assignNurseSel').value,care_type:document.getElementById('assignCareType').value,start_date:document.getElementById('assignStart').value,shift_start:document.getElementById('assignShiftS').value,shift_end:document.getElementById('assignShiftE').value,is_active:true};let {data,error}=await supa.from('patient_assignments').insert([payload]).select().single();if(error){alert(error.message);return}let today=new Date().toISOString().split('T')[0];await supa.from('care_visits').insert([{patient_id:curPatient.id,nurse_id:payload.nurse_id,assignment_id:data.id,visit_date:today,status:'Scheduled'}]);closeModals();alert('Assigned!');loadAll();}
-async function loadAll(){loadPatients();loadNurses();loadVisits();loadAlerts();loadDashboard();loadCarePlans();}
-async function loadPatients(){let {data,error}=await supa.from('patients').select('*').order('created_at',{ascending:false});if(error){document.getElementById('listPatients').innerHTML=error.message;return}allPatients=data||[];document.getElementById('kPatients').innerText=allPatients.length;let q=(document.getElementById('searchPatients')?.value||'').toLowerCase();let filtered=q?allPatients.filter(p=>p.full_name.toLowerCase().includes(q)):allPatients;document.getElementById('listPatients').innerHTML=filtered.map(p=>`<div class="item"><div><b>${p.full_name}</b><br><small>${p.location||''} • ${p.patient_id}</small></div><div><button onclick="viewPatient('${p.id}')" style="padding:6px 10px;width:auto">View</button> <button onclick="openCarePlanFromId('${p.id}')" style="padding:6px 10px;width:auto;background:#eee;color:#000">Plan</button> <button onclick="openAssignFromId('${p.id}')" style="padding:6px 10px;width:auto">Assign</button></div></div>`).join('')||'No patients';}
-function openCarePlanFromId(id){let p=allPatients.find(x=>x.id===id);if(p)openCarePlan(p);}function openAssignFromId(id){let p=allPatients.find(x=>x.id===id);if(p)openAssign(p);}
-async function loadNurses(){let {data}=await supa.from('nurses').select('*').order('full_name');document.getElementById('kNurses').innerText=(data||[]).length;document.getElementById('listNurses').innerHTML=(data||[]).map(n=>`<div class="item"><div><b>${n.full_name}</b></div><button onclick="delNurse('${n.id}')" style="background:#ef4444;width:auto">Del</button></div>`).join('');let {data:assigns}=await supa.from('patient_assignments').select('*, patients(full_name), nurses(full_name)').eq('is_active',true);document.getElementById('listAssignments').innerHTML=(assigns||[]).map(a=>`<div class="item"><div>${a.patients?.full_name} → ${a.nurses?.full_name}</div></div>`).join('')||'No assignments';}
-async function addNurse(){let name=document.getElementById('sname').value.trim();if(!name)return;await supa.from('nurses').insert([{full_name:name}]);document.getElementById('sname').value='';loadNurses();}async function delNurse(id){await supa.from('nurses').delete().eq('id',id);loadNurses();}
-async function loadVisits(){let date=document.getElementById('visitDate')?.value||new Date().toISOString().split('T')[0];if(!document.getElementById('visitDate').value)document.getElementById('visitDate').value=date;let {data:visits}=await supa.from('care_visits').select('*, patients(full_name), nurses(full_name)').eq('visit_date',date);document.getElementById('kVisits').innerText=(visits||[]).length;let html='';for(let v of visits||[]){let {data:tasks}=await supa.from('treatment_tasks').select('*').eq('patient_id',v.patient_id);let {data:records}=await supa.from('care_records').select('*').eq('care_visit_id',v.id);let {data:meds}=await supa.from('medications').select('*').eq('patient_id',v.patient_id).eq('is_active',true);let {data:medAdmins}=await supa.from('medication_administrations').select('*').eq('care_visit_id',v.id);let total=(tasks||[]).length+(meds||[]).reduce((s,m)=>(m.times||[]).length,0);let done=(records||[]).filter(r=>r.is_completed).length+(medAdmins||[]).filter(m=>m.is_given).length;let pct=total?Math.round(done/total*100):0;html+=`<div class="card"><b>${v.patients?.full_name}</b> - ${v.nurses?.full_name}<br><small>${done}/${total} (${pct}%)</small><div style="background:#eee;height:8px;border-radius:10px;margin-top:6px"><div style="width:${pct}%;background:#22c55e;height:8px;border-radius:10px"></div></div></div>`}document.getElementById('listVisits').innerHTML=html||'No visits';}
-async function generateTodayVisits(){let today=new Date().toISOString().split('T')[0];let {data:assigns}=await supa.from('patient_assignments').select('*').eq('is_active',true);for(let a of assigns||[]){let {data:ex}=await supa.from('care_visits').select('id').eq('patient_id',a.patient_id).eq('visit_date',today).maybeSingle();if(!ex)await supa.from('care_visits').insert([{patient_id:a.patient_id,nurse_id:a.nurse_id,assignment_id:a.id,visit_date:today,status:'Scheduled'}]);}alert('Generated');loadVisits();}
-async function loadDashboard(){let {data:alerts}=await supa.from('alerts').select('*').eq('is_read',false);document.getElementById('kAlerts').innerText=(alerts||[]).length;let {data:records}=await supa.from('care_records').select('*, patients(full_name)').order('completed_at',{ascending:false}).limit(10);document.getElementById('recentTimeline').innerHTML=(records||[]).map(r=>`<div style="margin-bottom:8px"><small>${r.completed_at?new Date(r.completed_at).toLocaleString():''}</small><br>${r.patients?.full_name} - completed</div>`).join('')||'No activity';}
-async function loadCarePlans(){let {data}=await supa.from('care_plans').select('*, patients(full_name, patient_id)').order('created_at',{ascending:false});let html='';for(let cp of data||[]){let {data:meds}=await supa.from('medications').select('*').eq('patient_id',cp.patient_id).eq('is_active',true);html+=`<div class="card"><b>${cp.patients?.full_name}</b> <small>${cp.patients?.patient_id||''}</small><br><small>${cp.care_type} ${cp.care_frequency}<br>Meds (${(meds||[]).length}): ${(meds||[]).map(m=>m.drug_name+' '+m.dose).join(', ')||'None'}</small><br><div class="row" style="margin-top:8px"><button onclick="openTasksFromPlan('${cp.id}')" style="width:auto">Edit Tasks & Meds</button><button onclick="openDirectMedWriteFor('${cp.patient_id}')" style="width:auto;background:#22c55e">+ Add Meds</button></div></div>`}if(!data||!data.length){let {data:patients}=await supa.from('patients').select('*');if(patients&&patients.length){html=`<div class="card"><b>Patients exist but no Care Plans yet</b><br><small>${patients.map(p=>p.full_name).join(', ')}</small><br><button class="green" onclick="openDirectMedWrite()" style="margin-top:8px">+ WRITE MEDICATIONS DIRECTLY</button></div>`}else{html='No plans - Add patient first';}}document.getElementById('listCarePlans').innerHTML=html;}
-async function openDirectMedWriteFor(pid){await openDirectMedWrite();document.getElementById('directPatientSel').value=pid;loadDirectPatientMeds();}
-async function openTasksFromPlan(planId){let {data:cp}=await supa.from('care_plans').select('*, patients(*)').eq('id',planId).single();if(cp)openTasks(cp,cp.patients);}
-async function loadAlerts(){let {data}=await supa.from('alerts').select('*, patients(full_name)').order('created_at',{ascending:false});document.getElementById('listAlerts').innerHTML=(data||[]).map(a=>`<div class="item"><div><b>${a.patients?.full_name||''}</b><br>${a.message}</div><button onclick="markRead('${a.id}')" style="width:auto">Read</button></div>`).join('')||'No alerts';}
-async function markRead(id){await supa.from('alerts').update({is_read:true}).eq('id',id);loadAlerts();loadDashboard();}
-async function viewPatient(pid){let {data:p}=await supa.from('patients').select('*').eq('id',pid).single();let {data:meds}=await supa.from('medications').select('*').eq('patient_id',pid);document.getElementById('viewPatientTitle').innerText=p.full_name;document.getElementById('viewPatientBody').innerHTML=`<div class="card"><b>${p.full_name}</b> ${p.patient_id}<br><small>${p.location}</small></div><div class="card"><h4>Meds (${meds.length})</h4>${meds.map(m=>`<div>${m.drug_name} ${m.dose} ${m.frequency} ${(m.times||[]).join(',')}</div>`).join('')||'None'}</div>`;document.getElementById('modalViewPatient').classList.add('show');}
-document.getElementById('todayDate').innerText=new Date().toLocaleDateString('en-GB');
-if(prompt('Admin PIN:')!=='2024'){location.href='/';}else{loadAll();}
-</script></body></html>
+<div class="bottomNav"><div class="tabBtn active" onclick="switchTab('p-dashboard',this)">Dash</div><div class="tabBtn" onclick="switchTab('p-patients',this)">Patients</div><div class="tabBtn" onclick="switchTab('p-careplans',this)">Plans</div><div class="tabBtn" onclick="switchTab('p-nurses',this)">Nurses</div><div class="tabBtn" onclick="switchTab('p-visits',this)">Visits</div><div class="tabBtn" onclick="switchTab('p-alerts',this)">Alerts</div></div>
