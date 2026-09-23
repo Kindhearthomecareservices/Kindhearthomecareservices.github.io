@@ -1,222 +1,116 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>KindHeart Admin - Final</title>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KindHeart Admin - Editable</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--teal:#0f4a5a;--green:#6bb64a;--bg:#f6f8f4;--card:#fff;--border:#e8efe3;--muted:#667085}
+:root{--teal:#0f4a5a;--green:#6bb64a;--bg:#f6f8f4;--border:#e8efe3;--muted:#667085}
 *{box-sizing:border-box;font-family:Inter,sans-serif;margin:0;padding:0}
-body{background:var(--bg);max-width:480px;margin:0 auto;padding-bottom:110px}
+body{background:var(--bg);max-width:480px;margin:0 auto;padding-bottom:120px}
 .top{position:sticky;top:0;z-index:50;background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:10px}
-.logo img{width:40px;height:40px;border-radius:8px;object-fit:contain;background:#fff}
-.card{background:var(--card);border-radius:20px;margin:12px 14px;padding:16px;border:1px solid var(--border);box-shadow:0 4px 18px rgba(15,74,90,.06)}
-.card h3{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between}
-input,select,textarea{width:100%;padding:12px 13px;border:1.6px solid #d0d5dd;border-radius:13px;margin:6px 0;font-size:14px;background:#fff;outline:none}
-input:focus,select:focus{border-color:var(--green)}
-.btn{width:100%;padding:13px;border-radius:13px;border:0;font-weight:800;font-size:14px;cursor:pointer;margin-top:6px}
-.btn-teal{background:var(--teal);color:#fff}
-.btn-green{background:var(--green);color:#fff}
-.btn-outline{background:#fff;border:1.6px solid var(--teal);color:var(--teal)}
+.card{background:#fff;border-radius:20px;margin:12px 14px;padding:16px;border:1px solid var(--border);box-shadow:0 4px 18px rgba(15,74,90,.06)}
+input,select,textarea{width:100%;padding:12px 13px;border:1.6px solid #d0d5dd;border-radius:13px;margin:6px 0;font-size:14px;outline:none}
+.btn{width:100%;padding:12px;border-radius:13px;border:0;font-weight:800;cursor:pointer}
+.btn-teal{background:var(--teal);color:#fff}.btn-green{background:var(--green);color:#fff}.btn-outline{background:#fff;border:1.6px solid var(--teal);color:var(--teal)}
 .row{display:flex;gap:8px}.row>*{flex:1}
-.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#e8f5e3;color:var(--teal);border:1px solid #c9e8ba}
+.pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#e8f5e3;color:var(--teal);display:inline-block;margin:2px}
 .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--green));color:#fff;display:grid;place-items:center;font-weight:800;flex-shrink:0}
-.client{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #f2f4f7}
-.treat{padding:10px;border-left:4px solid var(--green);background:#f8faf6;border-radius:10px;margin:6px 0}
+.item{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #f2f4f7;align-items:center}
+.group{border:1px solid var(--border);border-radius:16px;margin:10px 0;overflow:hidden}
+.groupHead{background:#f8faf6;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.drugRow{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-top:1px solid #f2f4f7}
 .badge{background:var(--teal);color:#fff;padding:5px 11px;border-radius:99px;font-size:11px;font-weight:800}
-.pages .page{display:none}.pages .page.active{display:block;animation:fade .2s}
-@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.pages .page{display:none}.pages .page.active{display:block}
 .bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100;border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.08)}
-.tabBtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;padding:6px;border-radius:12px}
+.tabBtn{flex:1;display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;padding:6px;border-radius:12px}
 .tabBtn.active{color:var(--teal);background:#e8f5e3}
 .tabBtn span{font-size:20px}
+#editModal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:200;align-items:flex-end;padding:0}
+#editModal.show{display:flex}
+.modalBox{background:#fff;width:100%;max-width:480px;margin:0 auto;border-radius:24px 24px 0 0;padding:18px 16px 24px;max-height:88vh;overflow:auto;animation:up .25s}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.iconBtn{width:32px;height:32px;border-radius:50%;border:1px solid #d0d5dd;background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-</head><body>
-<div class="top"><div class="logo"><img src="logo.png" onerror="this.style.display='none'"><div><div style="font-weight:800;color:var(--teal)">KindHeart <span style="color:var(--green)">Admin</span></div><small style="color:var(--muted)">Right care at home • Premium</small></div></div><div class="badge" id="topCount">0 Clients</div></div>
+</head>
+<body>
+<div class="top">
+<div style="display:flex;gap:8px;align-items:center"><img src="logo.png" style="width:38px;height:38px;border-radius:8px;object-fit:contain" onerror="this.style.display='none'"><div><b style="color:var(--teal)">KindHeart <span style="color:var(--green)">Admin</span></b><div style="font-size:11px;color:var(--muted)">Right care at home • Premium</div></div></div>
+<div class="badge" id="topCount">0 Clients</div>
+</div>
 
 <div class="pages">
-<!-- HOME -->
 <div id="p-home" class="page active">
-<div class="card"><div class="row"><div style="background:#e8f5e3;padding:12px;border-radius:14px;flex:1"><small style="color:var(--muted)">Total Clients</small><div id="sClients" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div><div style="background:#eaf2ff;padding:12px;border-radius:14px;flex:1"><small style="color:var(--muted)">Active Staff</small><div id="sStaff" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div></div></div>
-
-<div class="card"><h3>➕ Add New Client <span style="font-weight:600;color:var(--muted);font-size:11px">No ID needed</span></h3>
+<div class="card"><div class="row"><div style="background:#e8f5e3;padding:12px;border-radius:14px;flex:1"><small>Total Clients</small><div id="sClients" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div><div style="background:#eaf2ff;padding:12px;border-radius:14px;flex:1"><small>Active Staff</small><div id="sStaff" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div></div></div>
+<div class="card"><h3>➕ Add New Client <span style="float:right;font-size:11px;color:var(--muted)">No ID needed</span></h3>
 <input id="fname" placeholder="Full Name e.g Steve Torotich"><div class="row"><input id="age" type="number" placeholder="Age"><select id="gender"><option value="">Gender</option><option>Male</option><option>Female</option></select></div>
 <input id="diag" placeholder="Diagnosis e.g Hypertension"><input id="famname" placeholder="Family Contact Name"><input id="famphone" placeholder="Family WhatsApp 07..."><input id="addr" placeholder="Address - Estate, Eldoret">
-<button class="btn btn-teal" onclick="addClient()">Save Client</button><div id="cmsg" style="margin-top:8px;font-weight:700;font-size:12px"></div></div>
+<button class="btn btn-teal" onclick="addClient()">Save Client</button><div id="cmsg" style="font-size:12px;font-weight:700;margin-top:6px"></div></div>
 
 <div class="card"><h3>💊 Quick Assign & Treatment</h3>
 <input id="cName" list="dlist" placeholder="Type Client Name" oninput="loadSheet()"><datalist id="dlist"></datalist>
-
-<div class="row">
-<select id="roleFilter" onchange="filterNurses()"><option value="all">All Roles</option><option value="nurse">Nurses Only</option><option value="caregiver">Caregivers Only</option></select>
-<select id="nurseSel"><option value="">Select Staff</option></select>
-</div>
-<button class="btn btn-green" onclick="assignStaff()">Assign Selected → Family will see name</button>
-<div id="assignMsg" style="font-size:12px;font-weight:700;margin-top:6px"></div>
-
+<div class="row"><select id="roleFilter" onchange="filterNurses()"><option value="all">All Roles</option><option value="nurse">Nurses Only</option><option value="caregiver">Caregivers Only</option></select><select id="nurseSel"><option value="">Select Staff</option></select></div>
+<button class="btn btn-green" onclick="assignStaff()">Assign Selected → Family will see name</button><div id="assignMsg" style="font-size:12px;font-weight:700;margin-top:6px"></div>
 <div style="margin-top:12px;border-top:1px dashed #e5e7eb;padding-top:10px">
-<div class="row"><input id="drug" placeholder="Drug e.g Amlodipine"><input id="dose" placeholder="5mg"></div>
+<div class="row"><input id="drug" placeholder="Drug e.g Amlodip"><input id="dose" placeholder="5mg"></div>
 <div class="row"><select id="freq"><option value="">Freq</option><option>OD</option><option>BD</option><option>TDS</option></select><input id="times" placeholder="Morning, Evening"></div>
-<button class="btn btn-outline" onclick="addTreatment()">+ Add to Treatment Sheet</button>
-<div id="sheetPreview" style="margin-top:10px"></div>
-</div>
-</div>
+<button class="btn btn-outline" onclick="addTreatment()">+ Add to Treatment Sheet</button><div id="sheetPreview" style="margin-top:10px"></div>
+</div></div>
 </div>
 
-<!-- CLIENTS -->
-<div id="p-clients" class="page">
-<div class="card"><h3>👥 All Clients <input id="search" placeholder="🔍 Search..." style="margin:0;padding:8px 10px" oninput="filterClients()"></h3><div id="listClients">Loading...</div></div>
+<div id="p-clients" class="page"><div class="card"><h3>👥 All Clients <input id="search" placeholder="🔍 Search..." style="margin:6px 0;padding:8px 10px" oninput="renderClients()"></h3><div id="listClients"></div></div></div>
+<div id="p-staff" class="page"><div class="card"><h3>👩‍⚕️ Add Staff (Nurse / Caregiver)</h3><div class="row"><input id="sname" placeholder="Name e.g Faith"><select id="srole"><option>Nurse</option><option>Caregiver</option><option>RN</option><option>Care Assistant</option></select></div><div class="row"><input id="sphone" placeholder="Phone 07..."><input id="sid" placeholder="ID No"></div><button class="btn btn-outline" onclick="addStaff()">+ Add Staff</button></div><div class="card"><h3>Staff List</h3><div id="listStaff"></div></div></div>
+<div id="p-sheets" class="page"><div class="card"><h3>💊 Treatment Sheets - Grouped by Client</h3><div id="allSheets">Loading...</div></div></div>
+<div id="p-reports" class="page"><div class="card"><h3>📋 Nurse Daily Reports</h3><div id="reportList">Loading...</div></div></div>
 </div>
 
-<!-- STAFF -->
-<div id="p-staff" class="page">
-<div class="card"><h3>👩‍⚕️ Add Staff (Nurse / Caregiver)</h3>
-<div class="row"><input id="sname" placeholder="Name e.g Faith Chebet"><select id="srole"><option>Nurse</option><option>Caregiver</option><option>RN</option><option>Care Assistant</option></select></div>
-<div class="row"><input id="sphone" placeholder="Phone 07..."><input id="sid" placeholder="ID No"></div>
-<button class="btn btn-outline" onclick="addStaff()">+ Add Staff</button></div>
-<div class="card"><h3>Staff List</h3><div id="listStaff"></div></div>
-</div>
-
-<!-- SHEETS -->
-<div id="p-sheets" class="page"><div class="card"><h3>💊 All Treatment Sheets</h3><div id="allSheets">Loading...</div></div></div>
-
-<!-- REPORTS - NEW FOR ADMIN -->
-<div id="p-reports" class="page">
-<div class="card"><h3>📋 Nurse Daily Reports (Admin View)</h3><div id="reportList">Loading...</div></div>
-</div>
-
-</div>
-
-<!-- TABS -->
 <div class="bottomNav">
-<div class="tabBtn active" onclick="openTab('p-home',this)"><span>🏠</span>Home</div>
+<div class="tabBtn active" id="btn-home" onclick="openTab('p-home',this)"><span>🏠</span>Home</div>
 <div class="tabBtn" onclick="openTab('p-clients',this)"><span>👥</span>Clients</div>
 <div class="tabBtn" onclick="openTab('p-staff',this)"><span>👩‍⚕️</span>Staff</div>
 <div class="tabBtn" onclick="openTab('p-sheets',this)"><span>💊</span>Sheets</div>
 <div class="tabBtn" onclick="openTab('p-reports',this)"><span>📋</span>Reports</div>
 </div>
 
+<div id="editModal" onclick="if(event.target.id==='editModal')closeModal()"><div class="modalBox"><h3 id="modalTitle">Edit</h3><div id="modalBody" style="margin-top:10px"></div><div class="row" style="margin-top:12px"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button id="modalSave" class="btn btn-teal">Save Changes</button></div><button id="modalDelete" class="btn" style="background:#fee4e2;color:#b42318;margin-top:8px">🗑️ Delete</button></div></div>
+
 <script>
 const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
-const SB_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
-const supa = window.supabase.createClient(SB_URL, SB_KEY);
-let allClients=[], allStaff=[], staffFiltered=[];
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubHZlbHFlcWJtaGFteXF0enhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTM3NDMsImV4cCI6MjA2MDY2OTc0M30.5c3eU0OFOuelYmgIpMWC3TseZCTT_3nAhd1d2nVEbGY";
+const supa=window.supabase.createClient(SB_URL,SB_KEY);
+let allClients=[], allStaff=[], allSheets=[], staffFiltered=[];
 
-function openTab(id, el){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
- document.getElementById(id).classList.add('active');
- document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
- el.classList.add('active');
- window.scrollTo({top:0,behavior:'smooth'});
- if(id==='p-reports') loadReports();
-}
+function openTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');window.scrollTo(0,0);if(id==='p-reports')loadReports();if(id==='p-sheets')loadSheetsGrouped();}
+function openModal(t,html,saveFn,delFn){modalTitle.innerText=t;modalBody.innerHTML=html;editModal.classList.add('show');modalSave.onclick=saveFn;modalDelete.style.display=delFn?'block':'none';modalDelete.onclick=delFn||(()=>{});}
+function closeModal(){editModal.classList.remove('show');}
+function makeId(n){return 'KH-'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,15)+'-'+Date.now().toString().slice(-4);}
 
-function makeId(name){ return 'KH-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,15)+'-'+Date.now().toString().slice(-4); }
+// CLIENTS
+function renderClients(){const q=(document.getElementById('search')?.value||'').toLowerCase();const list=allClients.filter(c=>c.full_name.toLowerCase().includes(q));document.getElementById('listClients').innerHTML=list.map(c=>`<div class=item><div class=avatar>${c.full_name.slice(0,2).toUpperCase()}</div><div style="flex:1"><b>${c.full_name}</b><br><small style="color:var(--muted)">${c.diagnosis||''} • ${c.address||''}<br><span class=pill>👩‍⚕️ ${c.assigned_nurse_name||'Not assigned'} ${c.assigned_nurse_role? '('+c.assigned_nurse_role+')':''}</span></small></div><div style="display:flex;gap:6px"><button class=iconBtn onclick="editClientById('${c.patient_id}')">✏️</button><button class=iconBtn onclick="deleteClientById('${c.patient_id}')">🗑️</button></div></div>`).join('')||'No clients';}
+function editClientById(pid){const c=allClients.find(x=>x.patient_id===pid);if(!c)return;const html=`<input id=e_name value="${c.full_name}"><div class=row><input id=e_age type=number value="${c.age||''}"><select id=e_gender><option ${c.gender==='Male'?'selected':''}>Male</option><option ${c.gender==='Female'?'selected':''}>Female</option></select></div><input id=e_diag value="${c.diagnosis||''}"><input id=e_famname value="${c.family_name||''}"><input id=e_famphone value="${c.family_phone||''}"><input id=e_addr value="${c.address||''}"><input id=e_nurse value="${c.assigned_nurse_name||''}" placeholder="Assigned nurse"><input id=e_nrole value="${c.assigned_nurse_role||''}" placeholder="Role">`;openModal('Edit Client',html,async()=>{const upd={full_name:e_name.value,age:parseInt(e_age.value)||null,gender:e_gender.value,diagnosis:e_diag.value,family_name:e_famname.value,family_phone:e_famphone.value,address:e_addr.value,assigned_nurse_name:e_nurse.value,assigned_nurse_role:e_nrole.value};let {error}=await supa.from('patients').update(upd).eq('patient_id',pid);if(error)alert(error.message);else{closeModal();loadData();}},async()=>{if(confirm('Delete '+c.full_name+'?')){await supa.from('patients').delete().eq('patient_id',pid);closeModal();loadData();}});}
+async function deleteClientById(pid){if(!confirm('Delete this client?'))return;await supa.from('patients').delete().eq('patient_id',pid);loadData();}
 
-async function addClient(){
- const name=document.getElementById('fname').value.trim();
- if(!name){ alert('Enter full name'); return; }
- document.getElementById('cmsg').innerText='Saving...';
- try{
-  const pid=makeId(name);
-  const {error}=await supa.from('patients').insert({
-   patient_id:pid, full_name:name,
-   age:parseInt(document.getElementById('age').value)||null,
-   gender:document.getElementById('gender').value,
-   diagnosis:document.getElementById('diag').value,
-   family_name:document.getElementById('famname').value,
-   family_phone:document.getElementById('famphone').value,
-   address:document.getElementById('addr').value
-  });
-  if(error) throw error;
-  document.getElementById('cmsg').innerText='✅ Saved '+name;
-  document.getElementById('fname').value=''; document.getElementById('age').value=''; document.getElementById('diag').value=''; document.getElementById('famname').value=''; document.getElementById('famphone').value=''; document.getElementById('addr').value='';
-  loadData();
- }catch(e){ document.getElementById('cmsg').innerText='❌ '+e.message; }
-}
+// STAFF
+function renderStaff(){listStaff.innerHTML=allStaff.map(s=>`<div class=item><div class=avatar style="background:#e8f5e3;color:var(--teal)">${s.name[0]}</div><div style="flex:1"><b>${s.name}</b><br><small>${s.role} • ${s.phone||''}</small></div><div style="display:flex;gap:6px"><button class=iconBtn onclick="editStaffById('${s.id}')">✏️</button><button class=iconBtn onclick="deleteStaffById('${s.id}')">🗑️</button></div></div>`).join('')||'No staff';}
+function editStaffById(id){const s=allStaff.find(x=>x.id===id);if(!s)return;const html=`<input id=e_sname value="${s.name}"><select id=e_srole><option ${s.role==='Nurse'?'selected':''}>Nurse</option><option ${s.role==='Caregiver'?'selected':''}>Caregiver</option><option ${s.role==='RN'?'selected':''}>RN</option><option ${s.role==='Care Assistant'?'selected':''}>Care Assistant</option></select><input id=e_sphone value="${s.phone||''}"><input id=e_sid value="${s.id_number||''}">`;openModal('Edit Staff',html,async()=>{const upd={name:e_sname.value,role:e_srole.value,phone:e_sphone.value,id_number:e_sid.value};let {error}=await supa.from('staff').update(upd).eq('id',id);if(error)alert(error.message);else{closeModal();loadData();}},async()=>{if(confirm('Delete staff '+s.name+'?')){await supa.from('staff').delete().eq('id',id);closeModal();loadData();}});}
+async function deleteStaffById(id){if(!confirm('Delete staff?'))return;await supa.from('staff').delete().eq('id',id);loadData();}
 
-async function addStaff(){
- const name=sname.value.trim(); if(!name){alert('Enter name');return}
- try{ await supa.from('staff').insert({name:name, role:srole.value, phone:sphone.value, id_number:sid.value}); sname.value=''; sphone.value=''; sid.value=''; loadData(); }catch(e){ alert(e.message); }
-}
+// SHEETS GROUPED
+async function loadSheetsGrouped(){allSheets.innerHTML='Loading...';try{let {data,error}=await supa.from('treatment_sheets').select('*, patients!inner(full_name, patient_id)').order('created_at',{ascending:false});if(error)throw error;allSheets=data||[];const groups={};allSheets.forEach(r=>{const key=r.patients.full_name;if(!groups[key])groups[key]=[];groups[key].push(r);});allSheets.innerHTML=Object.keys(groups).map(clientName=>{const drugs=groups[clientName];return `<div class=group><div class=groupHead onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'"><b>👤 ${clientName}</b><span class=pill>${drugs.length} drugs</span></div><div>${drugs.map(d=>`<div class=drugRow><div><b>${d.drug_name}</b> <small>${d.dosage||''} ${d.frequency||''}</small><br><small style="color:var(--muted)">${d.times||''} ${d.is_active?'• Active':'• Inactive'}</small></div><div style="display:flex;gap:6px"><button class=iconBtn onclick="editDrugById('${d.id}')">✏️</button><button class=iconBtn onclick="deleteDrugById('${d.id}')">🗑️</button></div></div>`).join('')}</div></div>`}).join('')||'No sheets';}catch(e){allSheets.innerHTML='❌ '+e.message;}}
+function editDrugById(id){const t=allSheets.find(x=>x.id===id);if(!t)return;const html=`<input id=e_drug value="${t.drug_name}"><div class=row><input id=e_dose value="${t.dosage||''}"><select id=e_freq><option value="">Freq</option><option ${t.frequency==='OD'?'selected':''}>OD</option><option ${t.frequency==='BD'?'selected':''}>BD</option><option ${t.frequency==='TDS'?'selected':''}>TDS</option></select></div><input id=e_times value="${t.times||''}"><label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-top:6px"><input type=checkbox id=e_active ${t.is_active?'checked':''}> Active</label>`;openModal('Edit Drug',html,async()=>{const upd={drug_name:e_drug.value,dosage:e_dose.value,frequency:e_freq.value,times:e_times.value,is_active:e_active.checked};let {error}=await supa.from('treatment_sheets').update(upd).eq('id',id);if(error)alert(error.message);else{closeModal();loadSheetsGrouped();loadSheet();}},async()=>{if(confirm('Delete this drug?')){await supa.from('treatment_sheets').delete().eq('id',id);closeModal();loadSheetsGrouped();}});}
+async function deleteDrugById(id){if(!confirm('Delete this drug?'))return;await supa.from('treatment_sheets').delete().eq('id',id);loadSheetsGrouped();}
 
-function filterNurses(){
- const f=roleFilter.value.toLowerCase();
- staffFiltered = f==='all' ? allStaff : allStaff.filter(s=>s.role.toLowerCase().includes(f));
- renderStaffSelect();
-}
-
-function renderStaffSelect(){
- nurseSel.innerHTML='<option value="">Select Staff</option>'+staffFiltered.map(s=>`<option value="${s.name}|${s.phone}|${s.role}">${s.name} - ${s.role}</option>`).join('');
-}
-
-async function assignStaff(){
- const cname=cName.value.trim(); const val=nurseSel.value;
- if(!cname||!val){ alert('Select client and staff'); return; }
- assignMsg.innerText='Assigning...';
- const [nName,nPhone,nRole]=val.split('|');
- try{
-  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
-  if(!pt) throw new Error('Client not found');
-  let {error}=await supa.from('patients').update({assigned_nurse_name:nName, assigned_nurse_phone:nPhone, assigned_nurse_role:nRole}).eq('patient_id',pt.patient_id);
-  if(error) throw error;
-  assignMsg.innerText='✅ '+nName+' ('+nRole+') assigned to '+cname;
-  loadData();
- }catch(e){ assignMsg.innerText='❌ '+e.message; }
-}
-
-async function addTreatment(){
- const cname=cName.value.trim(); if(!cname){ alert('Enter client name'); return; }
- try{
-  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
-  if(!pt) throw new Error('Client not found');
-  let {error}=await supa.from('treatment_sheets').insert({patient_id:pt.patient_id, drug_name:drug.value, dosage:dose.value, frequency:freq.value, times:times.value});
-  if(error) throw error;
-  drug.value=''; dose.value=''; times.value=''; freq.value='';
-  loadSheet(); loadData();
- }catch(e){ alert(e.message); }
-}
-
-async function loadSheet(){
- const cname=cName.value.trim(); if(!cname) return;
- try{
-  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
-  if(!pt) return;
-  let {data}=await supa.from('treatment_sheets').select('*').eq('patient_id',pt.patient_id).eq('is_active',true).order('created_at');
-  sheetPreview.innerHTML=(data||[]).map(m=>`<div class=treat><b>${m.drug_name}</b> ${m.dosage||''} ${m.frequency||''}<br><small>${m.times||''}</small></div>`).join('')||'<small>No meds yet</small>';
- }catch(e){}
-}
-
-function filterClients(){
- const q=search.value.toLowerCase(); const filtered=allClients.filter(c=>c.full_name.toLowerCase().includes(q));
- renderClients(filtered);
-}
-
-function renderClients(list){
- listClients.innerHTML=(list||[]).map(c=>`<div class=client><div class=avatar>${c.full_name.slice(0,2).toUpperCase()}</div><div style="flex:1"><b>${c.full_name}</b><br><small style="color:#667085">${c.diagnosis||'No diagnosis'} • ${c.address||''}<br><span class=pill>👩‍⚕️ ${c.assigned_nurse_name?c.assigned_nurse_name+' ('+ (c.assigned_nurse_role||'') +')':'Not assigned'}</span></small></div></div>`).join('')||'No clients';
-}
-
-async function loadReports(){
- reportList.innerHTML='Loading...';
- try{
-  let {data,error}=await supa.from('daily_sheets').select('*, patients!inner(full_name)').order('created_at',{ascending:false}).limit(30);
-  if(error) throw error;
-  if(!data||!data.length){ reportList.innerHTML='No reports yet - nurses have not submitted'; return; }
-  reportList.innerHTML=data.map(r=>`<div class=treat style="border-left-color:var(--teal)"><b>${r.patients.full_name}</b> - ${new Date(r.created_at).toLocaleString()}<br><small>BP:${r.bp_morning||'-'} HR:${r.hr_morning||'-'} Temp:${r.temp_morning||'-'} AVPU:${r.avpu||''}<br><b>Care:</b> ${r.nursing_cares||''}<br><b>Report:</b> ${r.day_report||''}<br>Pills: ${r.pills_remaining||0} (${r.days_left||0} days left) | Input:${r.input_ml||''} Output:${r.output_ml||''}</small></div>`).join('');
- }catch(e){ reportList.innerHTML='❌ '+e.message; }
-}
-
-async function loadData(){
- try{
-  let {data:p}=await supa.from('patients').select('*').order('created_at',{ascending:false});
-  allClients=p||[]; document.getElementById('topCount').innerText=allClients.length+' Clients'; sClients.innerText=allClients.length;
-  dlist.innerHTML=allClients.map(c=>`<option value="${c.full_name}">`).join('');
-  renderClients(allClients);
-  let {data:s}=await supa.from('staff').select('*').eq('active',true).order('created_at',{ascending:false});
-  allStaff=s||[]; sStaff.innerText=allStaff.length; staffFiltered=allStaff; renderStaffSelect();
-  listStaff.innerHTML=allStaff.map(s=>`<span class=pill style="margin:3px;display:inline-block">${s.name} - ${s.role} ${s.phone?'('+s.phone+')':''}</span>`).join(' ')||'No staff';
-  let {data:ts}=await supa.from('treatment_sheets').select('*, patients!inner(full_name)').eq('is_active',true).order('created_at',{ascending:false}).limit(50);
-  allSheets.innerHTML=(ts||[]).map(t=>`<div class=treat>${t.patients.full_name}: <b>${t.drug_name}</b> ${t.dosage||''} ${t.frequency||''}</div>`).join('')||'No sheets';
- }catch(e){ console.log(e); }
-}
-if(prompt('Admin PIN')!=='2024'){ location.href='/'; }else{ loadData(); }
-</script></body></html>
+async function addClient(){const name=fname.value.trim();if(!name){alert('Enter name');return}cmsg.innerText='Saving...';try{const pid=makeId(name);const {error}=await supa.from('patients').insert({patient_id:pid,full_name:name,age:parseInt(age.value)||null,gender:gender.value,diagnosis:diag.value,family_name:famname.value,family_phone:famphone.value,address:addr.value});if(error)throw error;cmsg.innerText='✅ Saved';fname.value='';age.value='';diag.value='';famname.value='';famphone.value='';addr.value='';loadData();}catch(e){cmsg.innerText='❌ '+e.message;}}
+async function addStaff(){const name=sname.value.trim();if(!name){alert('Enter name');return}try{await supa.from('staff').insert({name:name,role:srole.value,phone:sphone.value,id_number:sid.value});sname.value='';sphone.value='';sid.value='';loadData();}catch(e){alert(e.message);}}
+function filterNurses(){const f=roleFilter.value.toLowerCase();staffFiltered=f==='all'?allStaff:allStaff.filter(s=>s.role.toLowerCase().includes(f));nurseSel.innerHTML='<option value="">Select Staff</option>'+staffFiltered.map(s=>`<option value="${s.name}|${s.phone}|${s.role}">${s.name} - ${s.role}</option>`).join('');}
+async function assignStaff(){const cname=cName.value.trim();const val=nurseSel.value;if(!cname||!val){alert('Select client and staff');return}assignMsg.innerText='Assigning...';const [nName,nPhone,nRole]=val.split('|');try{let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();if(!pt)throw new Error('Client not found');let {error}=await supa.from('patients').update({assigned_nurse_name:nName,assigned_nurse_phone:nPhone,assigned_nurse_role:nRole}).eq('patient_id',pt.patient_id);if(error)throw error;assignMsg.innerText='✅ '+nName+' assigned';loadData();}catch(e){assignMsg.innerText='❌ '+e.message;}}
+async function addTreatment(){const cname=cName.value.trim();if(!cname){alert('Enter client name');return}try{let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();if(!pt)throw new Error('Client not found');let {error}=await supa.from('treatment_sheets').insert({patient_id:pt.patient_id,drug_name:drug.value,dosage:dose.value,frequency:freq.value,times:times.value});if(error)throw error;drug.value='';dose.value='';times.value='';freq.value='';loadSheet();loadSheetsGrouped();}catch(e){alert(e.message);}}
+async function loadSheet(){const cname=cName.value.trim();if(!cname)return;try{let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();if(!pt)return;let {data}=await supa.from('treatment_sheets').select('*').eq('patient_id',pt.patient_id).order('created_at');sheetPreview.innerHTML=(data||[]).map(m=>`<div style="padding:8px;border-left:4px solid var(--green);background:#f8faf6;border-radius:10px;margin:4px 0;display:flex;justify-content:space-between"><div><b>${m.drug_name}</b> ${m.dosage||''} <small>${m.times||''}</small></div><span style="display:flex;gap:4px"><button class=iconBtn onclick="editDrugById('${m.id}')">✏️</button></span></div>`).join('')||'<small>No meds</small>';}catch(e){}}
+async function loadReports(){reportList.innerHTML='Loading...';try{let {data}=await supa.from('daily_sheets').select('*, patients!inner(full_name)').order('created_at',{ascending:false}).limit(30);if(!data||!data.length){reportList.innerHTML='No reports yet';return;}reportList.innerHTML=data.map(r=>`<div style="padding:10px;border-left:4px solid var(--teal);background:#f8faf6;border-radius:10px;margin:6px 0"><b>${r.patients.full_name}</b> - ${new Date(r.created_at).toLocaleString()}<br><small>BP:${r.bp_morning||'-'} HR:${r.hr_morning||'-'}<br>${r.nursing_cares||''}<br>${r.day_report||''}</small></div>`).join('');}catch(e){reportList.innerHTML='❌ '+e.message;}}
+async function loadData(){try{let {data:p}=await supa.from('patients').select('*').order('created_at',{ascending:false});allClients=p||[];topCount.innerText=allClients.length+' Clients';sClients.innerText=allClients.length;dlist.innerHTML=allClients.map(c=>`<option value="${c.full_name}">`).join('');renderClients();let {data:s}=await supa.from('staff').select('*').eq('active',true).order('created_at',{ascending:false});allStaff=s||[];sStaff.innerText=allStaff.length;staffFiltered=allStaff;filterNurses();renderStaff();loadSheetsGrouped();}catch(e){console.log(e);}}
+if(prompt('Admin PIN')!=='2024'){location.href='/';}else{loadData();}
+</script>
+</body>
+</html>
