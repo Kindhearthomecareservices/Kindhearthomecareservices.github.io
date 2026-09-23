@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Family Portal - KindHeart</title>
+<style>body{font-family:system-ui;padding:16px;max-width:700px;margin:auto;background:#fff7ed}.card{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}.alert{background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:10px;color:#991b1b;font-weight:700}.ok{background:#f0fdf4;border:1px solid #bbf7d0;padding:12px;border-radius:10px}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
+<h2 style="color:#c2410c">KindHeart Family Portal</h2>
+<div class="card"><input id="pid" placeholder="Enter KH-001" style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc"><button onclick="load()" style="background:#c2410c;color:#fff;padding:10px;border:0;border-radius:8px;margin-top:8px;width:100%">View Reports</button></div>
+<div id="out"></div>
+<script>
+const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
+const supabase=window.supabase.createClient(URL,KEY);
+async function load(){let pid=document.getElementById('pid').value||new URLSearchParams(location.search).get('id');if(!pid)return alert('Enter ID');document.getElementById('pid').value=pid;
+const {data,error}=await supabase.from('daily_sheets').select('*').eq('patient_id',pid).order('created_at',{ascending:false}).limit(5);
+if(error){out.innerHTML=error.message;return}if(!data.length){out.innerHTML='<div class=card>No reports yet</div>';return}
+out.innerHTML=data.map(r=>`<div class=card>${r.days_left<=4?`<div class=alert>⚠️ LOW: ${r.pills_remaining} pills - ${r.days_left} days left - <a href="https://wa.me/254712000000?text=Need refill for ${pid}">Order via M-Pesa</a></div>`:`<div class=ok>✅ ${r.pills_remaining} pills (${r.days_left} days left)</div>`}<p><b>${new Date(r.created_at).toLocaleString()}</b><br>AVPU:${r.avpu} BP:${r.bp_morning} HR:${r.hr_morning}<br>I/O ${r.input_ml}/${r.output_ml} ml Sleep:${r.sleep_hours}h ${r.sleep_quality}</p><p>${r.day_report}</p></div>`).join('')}
+const qp=new URLSearchParams(location.search).get('id');if(qp){document.getElementById('pid').value=qp;load();}
+</script></body></html>
