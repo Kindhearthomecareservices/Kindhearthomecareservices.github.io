@@ -1,46 +1,125 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KindHeart Nurse V3 Simple</title>
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KindHeart Nurse Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>:root{--teal:#0f4a5a;--green:#22c55e;--bg:#f6f8f4}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);padding:10px;padding-bottom:110px}
-.top{background:var(--teal);color:#fff;padding:16px;border-radius:16px;display:flex;justify-content:space-between;align-items:center}
-.card{background:#fff;border-radius:14px;padding:12px;margin:10px 0;box-shadow:0 2px 8px #0001;border:1px solid #e5e7eb}
-.task{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid #f2f4f7}
-.task input[type="checkbox"]{width:22px;height:22px}
-button{padding:14px;border:0;border-radius:12px;font-weight:800;cursor:pointer}
-.btn-save{position:fixed;bottom:10px;left:10px;right:10px;background:var(--green);color:#fff;font-size:17px;z-index:30;box-shadow:0 4px 12px #0003;padding:16px}
-.btn-small{padding:8px 12px;background:#f3f4f6;color:#111;width:auto;font-size:12px;border-radius:8px}
-select,input,textarea{width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:10px;margin:4px 0;font-size:14px}
+<style>
+:root{--teal:#0f4a5a;--green:#22c55e;--bg:#f7f8f5}
+*{font-family:Inter,system-ui;box-sizing:border-box}body{margin:0;background:var(--bg);padding-bottom:80px}
+.top{background:var(--teal);color:#fff;padding:14px;display:flex;gap:10px;align-items:center;position:sticky;top:0;z-index:20}
+.top img{width:42px;height:42px;background:#fff;border-radius:10px;padding:4px}
+.card{background:#fff;border-radius:16px;padding:14px;margin:10px;box-shadow:0 2px 8px #0001;border:1px solid #e5e7eb}
+.taskRow{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #f2f4f7}
+.taskRow.done{background:#f0fdf4}
+.medRow{display:flex;gap:8px;align-items:center;padding:10px;border:1px dashed #22c55e;border-radius:10px;margin:6px 0;background:#f0fdf4}
+.medRow.given{background:#dcfce7;border-style:solid}
+button{padding:10px 14px;border:0;border-radius:10px;background:var(--teal);color:#fff;font-weight:700}button.green{background:var(--green)}button.ghost{background:#f3f4f6;color:#111}
+input,select,textarea{width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;margin:5px 0}
+.progress{height:10px;background:#eee;border-radius:10px;overflow:hidden;margin:8px 0}.progress>div{height:10px;background:var(--green)}
+.loginBox{max-width:400px;margin:40px auto}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 </head><body>
-<div class="top"><div><b id="greet">Good morning</b><br><small id="nurseName">Loading...</small></div><select id="nurseSel" onchange="switchNurse()" style="width:auto;padding:8px;border-radius:8px;border:0"></select></div>
-<div id="patientList"></div>
-<div id="careView" style="display:none">
-<button class="btn-small" onclick="back()">← Back to patients</button>
-<div class="card"><b id="pName">Mary Doe</b><br><small id="pInfo"></small><div style="background:#eee;height:10px;border-radius:10px;margin-top:8px"><div id="pBar" style="width:0%;height:10px;background:#22c55e;border-radius:10px"></div></div><small id="pProg">0/0 completed</small></div>
-<div class="card"><b>Today's Tasks</b><div id="tasks"></div></div>
-<div class="card"><b>💊 Medications</b> <small>tick when given</small><div id="meds"></div></div>
-<div class="card"><b>Vitals (optional)</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input id="bp1" placeholder="BP Sys" type="number"><input id="bp2" placeholder="BP Dia" type="number"><input id="pulse" placeholder="Pulse" type="number"><input id="temp" placeholder="Temp °C" type="number"><input id="spo2" placeholder="SpO2 %" type="number"><input id="pain" placeholder="Pain 0-10" type="number"></div></div>
-<div class="card"><b>Condition</b><select id="cond"><option>Stable</option><option>Improving</option><option>Needs attention</option><option>Urgent</option></select><textarea id="note" placeholder="Short note..."></textarea></div>
-<button class="btn-save" onclick="saveAll()">💾 SAVE</button>
-<div id="msg" style="text-align:center;margin-top:8px;font-size:13px"></div>
+<div class="top"><img src="logo.png"><div><b>KINDHEART</b><br><small>NURSE / CAREGIVER PORTAL</small></div><div style="margin-left:auto"><small id="todayD"></small><br><b id="nurseNameTop"></b></div></div>
+
+<div id="loginPage"><div class="card loginBox"><h3>👩‍⚕️ Nurse Login</h3><p>Select your name (3 nurses active)</p><select id="nurseSelect"></select><input id="nursePin" type="password" placeholder="PIN 2024"><button onclick="loginNurse()" style="width:100%" class="green">LOGIN</button><div id="loginMsg" style="color:#ef4444;font-size:12px"></div><small>Test: Pick any of your 3 nurses, PIN 2024</small></div></div>
+
+<div id="mainPage" style="display:none">
+<div class="card" style="background:var(--teal);color:#fff"><div style="display:flex;justify-content:space-between"><div><small>Today's Progress</small><br><b id="myProgressText">0/0 tasks</b></div><div style="text-align:right"><b id="myPct">0%</b><br><small id="myPatientCount">0 patients</small></div></div><div class="progress" style="background:#ffffff33"><div id="myProgressBar" style="width:0%"></div></div></div>
+<div style="display:flex;gap:8px;margin:10px"><button onclick="loadMyVisits()" class="green" style="flex:1">🔄 Refresh My Patients</button><button onclick="logout()" class="ghost" style="flex:0.5">Logout</button></div>
+<div id="myVisitsList">Loading...</div>
+<div class="card"><h4>Quick Actions</h4><textarea id="alertMsg" placeholder="Write alert for admin e.g. Patient needs doctor"></textarea><div class="row" style="display:flex;gap:8px"><select id="alertPatientSel"></select><button onclick="sendAlert()" style="background:#ef4444">🚨 Send Alert</button></div></div>
 </div>
+
 <script>
 const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
-const SB_KEY="PASTE_ANON_KEY_HERE";
+const SB_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
 const supa=supabase.createClient(SB_URL,SB_KEY);
-let curNurse=null, curPatient=null, curVisit=null;
-let allTasks=[], allMeds=[], completedTasks=new Set(), completedMeds=new Set();
-async function init(){let {data:nurses}=await supa.from('nurses').select('*').order('full_name');document.getElementById('nurseSel').innerHTML=nurses.map(n=>`<option value="${n.id}">${n.full_name}</option>`).join('');curNurse=nurses[0];document.getElementById('nurseName').innerText=curNurse.full_name;document.getElementById('greet').innerText='Good '+(new Date().getHours()<12?'morning':new Date().getHours()<18?'afternoon':'evening')+',';loadPatients();}
-function switchNurse(){let id=document.getElementById('nurseSel').value;supa.from('nurses').select('*').eq('id',id).single().then(({data})=>{curNurse=data;document.getElementById('nurseName').innerText=data.full_name;loadPatients()})}
-async function loadPatients(){let today=new Date().toISOString().split('T')[0];let {data:assigns}=await supa.from('patient_assignments').select('*, patients(*)').eq('nurse_id',curNurse.id).eq('is_active',true);if(!assigns||!assigns.length){document.getElementById('patientList').innerHTML='<div class="card">No patients assigned. Ask admin.</div>';return}let html='';for(let a of assigns){let {data:visit}=await supa.from('care_visits').select('*').eq('patient_id',a.patient_id).eq('visit_date',today).maybeSingle();if(!visit){let {data:nv}=await supa.from('care_visits').insert([{patient_id:a.patient_id,nurse_id:curNurse.id,assignment_id:a.id,visit_date:today,status:'Scheduled'}]).select().single();visit=nv}let {data:tasks}=await supa.from('treatment_tasks').select('*').eq('patient_id',a.patient_id);let {data:meds}=await supa.from('medications').select('*').eq('patient_id',a.patient_id).eq('is_active',true);let {data:recs}=await supa.from('care_records').select('*').eq('care_visit_id',visit.id);let {data:medAds}=await supa.from('medication_administrations').select('*').eq('care_visit_id',visit.id);let total=(tasks||[]).length+(meds||[]).reduce((s,m)=>(m.times||[]).length,0);let done=(recs||[]).filter(r=>r.is_completed).length+(medAds||[]).filter(m=>m.is_given).length;html+=`<div class="card" onclick="openCare('${a.patient_id}','${visit.id}')"><b>${a.patients.full_name}</b> <span style="float:right;background:${done===total&&total>0?'#dcfce7':'#f3f4f6'};padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700">${done}/${total}</span><br><small>${a.patients.location||''} • ${a.shift_start}-${a.shift_end}</small><br><button class="btn-small" style="margin-top:6px">Open →</button></div>`}document.getElementById('patientList').innerHTML=html;}
-async function openCare(pid,vid){let {data:patient}=await supa.from('patients').select('*').eq('id',pid).single();let {data:visit}=await supa.from('care_visits').select('*').eq('id',vid).single();curPatient=patient;curVisit=visit;document.getElementById('pName').innerText=patient.full_name;document.getElementById('pInfo').innerText=`${patient.location||''} • ${patient.diagnosis||''} • ${visit.visit_date}`;document.getElementById('patientList').style.display='none';document.getElementById('careView').style.display='block';let {data:tasks}=await supa.from('treatment_tasks').select('*').eq('patient_id',pid).order('task_time');let {data:recs}=await supa.from('care_records').select('*').eq('care_visit_id',vid);allTasks=tasks||[];completedTasks=new Set(recs.filter(r=>r.is_completed).map(r=>r.task_id));renderTasks();let {data:meds}=await supa.from('medications').select('*').eq('patient_id',pid).eq('is_active',true);let {data:medAdmins}=await supa.from('medication_administrations').select('*').eq('care_visit_id',vid);allMeds=meds||[];completedMeds=new Set(medAdmins.filter(m=>m.is_given).map(m=>m.medication_id+'_'+m.scheduled_time));renderMeds(medAdmins);let {data:note}=await supa.from('nursing_notes').select('*').eq('care_visit_id',vid).maybeSingle();if(note){document.getElementById('cond').value=note.overall_condition||'Stable';document.getElementById('note').value=note.nurse_note||''}updateProgress();}
-function back(){document.getElementById('careView').style.display='none';document.getElementById('patientList').style.display='block';loadPatients();}
-function renderTasks(){document.getElementById('tasks').innerHTML=allTasks.map(t=>{let done=completedTasks.has(t.id);return `<label class="task"><input type="checkbox" ${done?'checked':''} onchange="toggleTask('${t.id}',this.checked)"><div><b>${t.task_time.slice(0,5)}</b> ${t.title}<br><small style="color:#667085">${t.instructions||t.category}</small></div></label>`}).join('')||'<small>No tasks</small>';}
-function renderMeds(admins){if(!allMeds.length){document.getElementById('meds').innerHTML='<small>No medications</small>';return}document.getElementById('meds').innerHTML=allMeds.map(m=>{let times=m.times||['08:00'];return `<div style="padding:10px 0;border-bottom:1px solid #f2f4f7"><b>${m.drug_name} ${m.dose}</b> <small>${m.frequency} • ${m.duration||''}</small><br><small style="color:#667085">${m.instructions||''} • ${m.route}</small><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">`+times.map(time=>{let key=m.id+'_'+time;let given=completedMeds.has(key);let admin=admins.find(a=>a.medication_id===m.id && a.scheduled_time===time);return `<label style="display:flex;align-items:center;gap:4px;background:${given?'#dcfce7':'#f9fafb'};padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb;font-size:12px"><input type="checkbox" ${given?'checked':''} onchange="toggleMed('${m.id}','${time}',this.checked)"> ${time} ${given?`✅${admin?.given_at?new Date(admin.given_at).toLocaleTimeString().slice(0,5):''}`:''}</label>`}).join('')+`</div></div>`}).join('');}
-function toggleTask(id,checked){if(checked)completedTasks.add(id);else completedTasks.delete(id);updateProgress();}
-function toggleMed(medId,time,checked){let key=medId+'_'+time;if(checked)completedMeds.add(key);else completedMeds.delete(key);updateProgress();}
-function updateProgress(){let total=allTasks.length+allMeds.reduce((s,m)=>(m.times||[]).length,0);let done=completedTasks.size+completedMeds.size;let pct=total?Math.round(done/total*100):0;document.getElementById('pBar').style.width=pct+'%';document.getElementById('pProg').innerText=`${done}/${total} completed (${pct}%)`;}
-async function saveAll(){document.getElementById('msg').innerText='Saving...';for(let t of allTasks){let isDone=completedTasks.has(t.id);await supa.from('care_records').upsert([{patient_id:curPatient.id,care_visit_id:curVisit.id,task_id:t.id,is_completed:isDone,completed_by:isDone?curNurse.id:null,completed_at:isDone?new Date().toISOString():null}],{onConflict:'task_id,care_visit_id'})}for(let m of allMeds){for(let time of (m.times||['08:00'])){let key=m.id+'_'+time;let isGiven=completedMeds.has(key);await supa.from('medication_administrations').upsert([{patient_id:curPatient.id,medication_id:m.id,care_visit_id:curVisit.id,scheduled_time:time,is_given:isGiven,given_at:isGiven?new Date().toISOString():null,given_by:isGiven?curNurse.id:null}],{onConflict:'medication_id,care_visit_id,scheduled_time'})}}let bp1=document.getElementById('bp1').value,bp2=document.getElementById('bp2').value,pulse=document.getElementById('pulse').value,temp=document.getElementById('temp').value,spo2=document.getElementById('spo2').value,pain=document.getElementById('pain').value;if(bp1||bp2||pulse||temp||spo2||pain){await supa.from('vital_signs').insert([{patient_id:curPatient.id,care_visit_id:curVisit.id,bp_systolic:bp1?parseInt(bp1):null,bp_diastolic:bp2?parseInt(bp2):null,pulse:pulse?parseInt(pulse):null,temperature:temp?parseFloat(temp):null,spo2:spo2?parseInt(spo2):null,pain_score:pain?parseInt(pain):null,recorded_by:curNurse.id}])}let cond=document.getElementById('cond').value,note=document.getElementById('note').value;let {data:existing}=await supa.from('nursing_notes').select('id').eq('care_visit_id',curVisit.id).maybeSingle();if(existing)await supa.from('nursing_notes').update({overall_condition:cond,nurse_note:note,nurse_id:curNurse.id}).eq('id',existing.id);else await supa.from('nursing_notes').insert([{patient_id:curPatient.id,care_visit_id:curVisit.id,nurse_id:curNurse.id,overall_condition:cond,nurse_note:note}]);if(cond==='Urgent'||cond==='Needs attention'){await supa.from('alerts').insert([{patient_id:curPatient.id,type:'urgent_condition',message:`${curPatient.full_name} - ${cond} by ${curNurse.full_name}: ${note}`}]);}document.getElementById('msg').innerText='✅ Saved! '+new Date().toLocaleTimeString();setTimeout(()=>{document.getElementById('msg').innerText='';},3000);}
+let curNurse=null;
+document.getElementById('todayD').innerText=new Date().toLocaleDateString('en-GB');
+async function init(){let {data}=await supa.from('nurses').select('*').order('full_name');document.getElementById('nurseSelect').innerHTML=(data||[]).map(n=>`<option value="${n.id}">${n.role==='Caregiver'?'🤝':'👩‍⚕️'} ${n.full_name} - ${n.phone||''} - ${n.role||'Nurse'}</option>`).join('')||'<option>No nurses - Add in admin first</option>';}
+async function loginNurse(){let nid=document.getElementById('nurseSelect').value;let pin=document.getElementById('nursePin').value;if(pin!=='2024'){document.getElementById('loginMsg').innerText='Wrong PIN - Use 2024';return}let {data,error}=await supa.from('nurses').select('*').eq('id',nid).single();if(error){document.getElementById('loginMsg').innerText=error.message;return}curNurse=data;document.getElementById('nurseNameTop').innerText=data.full_name;document.getElementById('loginPage').style.display='none';document.getElementById('mainPage').style.display='block';loadMyVisits();}
+function logout(){location.reload();}async function loadMyVisits(){
+ if(!curNurse) return;
+ document.getElementById('myVisitsList').innerHTML='Loading my patients...';
+ let today=new Date().toISOString().split('T')[0];
+ // Get assignments for this nurse
+ let {data:assigns}=await supa.from('patient_assignments').select('*, patients(*)').eq('nurse_id',curNurse.id).eq('is_active',true);
+ if(!assigns||assigns.length===0){document.getElementById('myVisitsList').innerHTML='<div class="card">No patients assigned to you yet. Admin → Nurses → Assign</div>'; return;}
+ // Get today's visits
+ let {data:visits}=await supa.from('daily_visits').select('*, patients(*), nurses(*)').eq('nurse_id',curNurse.id).eq('visit_date',today);
+ let {data:allPatients}=await supa.from('patients').select('*');
+ document.getElementById('alertPatientSel').innerHTML=(assigns||[]).map(a=>`<option value="${a.patient_id}">${a.patients?.full_name}</option>`).join('');
+ let html='';
+ for(let a of assigns){
+  let pat=a.patients;
+  if(!pat) continue;
+  let v=(visits||[]).find(x=>x.patient_id===pat.id);
+  let {data:tasks}=await supa.from('daily_tasks').select('*').eq('patient_id',pat.id).order('task_date',{ascending:false}).limit(10);
+  let {data:meds}=await supa.from('medication_schedule').select('*').eq('patient_id',pat.id).eq('is_active',true);
+  let {data:records}=await supa.from('care_records').select('*').eq('patient_id',pat.id).eq('record_date',today);
+  let doneTasks=(records||[]).filter(r=>r.record_type==='task').length;
+  let doneMeds=(records||[]).filter(r=>r.record_type==='medication').length;
+  let total=(tasks?.length||0)+(meds?.length||0);
+  let done=doneTasks+doneMeds;
+  html+=`<div class="card" style="border-left:5px solid #0f4a5a"><div style="display:flex;justify-content:space-between"><div><b>🧑 ${pat.full_name}</b><br><small>${pat.location||''} • ${pat.diagnosis||'Home care'} • ${pat.phone||''}</small><br><small style="color:#22c55e">Assigned: ${a.care_type} ${a.shift_start||''}-${a.shift_end||''}</small></div><div><span style="background:#f0f9ff;padding:4px 8px;border-radius:10px;font-size:11px">${done}/${total||'0'} done</span></div></div>
+  <div style="margin-top:10px"><b>📋 Daily Tasks</b> ${(tasks||[]).map(t=>{
+    let isDone=(records||[]).some(r=>r.record_type==='task'&&r.details?.task===t.task_name);
+    return `<div class="taskRow ${isDone?'done':''}"><input type="checkbox" ${isDone?'checked':''} onchange="toggleTask('${pat.id}','${t.task_name.replace(/'/g,'')}','${t.id}',this)"><div><b>${t.task_name}</b><br><small>${t.frequency||''} ${t.scheduled_time||''}</small></div></div>`
+  }).join('')||'<small>No tasks yet - Admin → Plans → + TASK</small>'}</div>
+  <div style="margin-top:10px"><b>💊 Medications</b> ${(meds||[]).map(m=>{
+    let isGiven=(records||[]).some(r=>r.record_type==='medication'&&r.details?.med===m.medication_name&&r.details?.time===m.scheduled_time);
+    return `<div class="medRow ${isGiven?'given':''}"><input type="checkbox" ${isGiven?'checked':''} onchange="toggleMed('${pat.id}','${m.medication_name.replace(/'/g,'')}','${m.dosage}','${m.scheduled_time}',this)"><div><b>${m.scheduled_time||''} - ${m.medication_name} ${m.dosage}</b><br><small>${m.instructions||''}</small></div><div style="margin-left:auto">${isGiven?'✅ GIVEN':'⏰'}</div></div>`
+  }).join('')||'<small>No meds yet - Admin → Plans → WRITE MEDICATIONS</small>'}</div>
+  <div class="row" style="display:flex;gap:6px;margin-top:10px"><input id="vitals-${pat.id}" placeholder="Vitals: BP 120/80, Temp 36.5"><button onclick="saveVitals('${pat.id}')" class="ghost" style="flex:0.5">Save Vitals</button></div>
+  <textarea id="note-${pat.id}" placeholder="Add care note for ${pat.full_name}..."></textarea><button onclick="saveNote('${pat.id}')" style="width:100%;margin-top:4px">📝 Save Note</button>
+  </div>`;
+ }
+ document.getElementById('myVisitsList').innerHTML=html||'<div class="card">No data</div>';
+ updateProgress();
+}
+async function toggleTask(pid,taskName,taskId,cb){
+ if(!cb.checked) return;
+ let {error}=await supa.from('care_records').insert([{patient_id:pid,nurse_id:curNurse.id,record_type:'task',record_date:new Date().toISOString().split('T')[0],details:{task:taskName,task_id:taskId,done_at:new Date().toISOString()},created_by:curNurse.full_name}]);
+ if(!error){cb.parentElement.classList.add('done'); updateProgress();}
+}
+async function toggleMed(pid,medName,dosage,time,cb){
+ if(!cb.checked) return;
+ let {error}=await supa.from('care_records').insert([{patient_id:pid,nurse_id:curNurse.id,record_type:'medication',record_date:new Date().toISOString().split('T')[0],details:{med:medName,dosage:dosage,time:time,given_at:new Date().toISOString()},created_by:curNurse.full_name}]);
+ if(!error){cb.parentElement.classList.add('given'); cb.parentElement.querySelector('div:last-child').innerText='✅ GIVEN'; updateProgress();}
+}
+async function saveNote(pid){
+ let txt=document.getElementById('note-'+pid).value; if(!txt) return;
+ await supa.from('care_records').insert([{patient_id:pid,nurse_id:curNurse.id,record_type:'note',record_date:new Date().toISOString().split('T')[0],details:{note:txt},created_by:curNurse.full_name}]);
+ document.getElementById('note-'+pid).value=''; alert('Note saved!');
+}
+async function saveVitals(pid){
+ let txt=document.getElementById('vitals-'+pid).value; if(!txt) return;
+ await supa.from('care_records').insert([{patient_id:pid,nurse_id:curNurse.id,record_type:'vitals',record_date:new Date().toISOString().split('T')[0],details:{vitals:txt},created_by:curNurse.full_name}]);
+ document.getElementById('vitals-'+pid).value=''; alert('Vitals saved!');
+  }async function sendAlert(){
+ let pid=document.getElementById('alertPatientSel').value;
+ let msg=document.getElementById('alertMsg').value;
+ if(!pid||!msg){alert('Select patient and write alert');return;}
+ await supa.from('care_records').insert([{patient_id:pid,nurse_id:curNurse.id,record_type:'alert',record_date:new Date().toISOString().split('T')[0],details:{alert:msg,priority:'high'},created_by:curNurse.full_name}]);
+ document.getElementById('alertMsg').value='';
+ alert('🚨 Alert sent to admin!');
+}
+async function updateProgress(){
+ let today=new Date().toISOString().split('T')[0];
+ let {data:recs}=await supa.from('care_records').select('*').eq('nurse_id',curNurse.id).eq('record_date',today);
+ let {data:assigns}=await supa.from('patient_assignments').select('*, patients(*)').eq('nurse_id',curNurse.id).eq('is_active',true);
+ let total=0;
+ for(let a of (assigns||[])){
+  let {data:tasks}=await supa.from('daily_tasks').select('*',{count:'exact'}).eq('patient_id',a.patient_id);
+  let {data:meds}=await supa.from('medication_schedule').select('*',{count:'exact'}).eq('patient_id',a.patient_id).eq('is_active',true);
+  total+=(tasks?.length||0)+(meds?.length||0);
+ }
+ let done=(recs||[]).filter(r=>r.record_type==='task'||r.record_type==='medication').length;
+ let pct=total?Math.round((done/total)*100):0;
+ document.getElementById('myProgressBar').style.width=pct+'%';
+ document.getElementById('myPct').innerText=pct+'%';
+ document.getElementById('myProgressText').innerText=done+'/'+total+' tasks & meds done';
+ document.getElementById('myPatientCount').innerText=(assigns?.length||0)+' patients assigned';
+}
 init();
 </script></body></html>
