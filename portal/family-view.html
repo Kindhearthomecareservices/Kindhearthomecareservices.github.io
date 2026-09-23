@@ -1,176 +1,51 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KindHeart Family - Wellbeing</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--teal:#0f4a5a;--green:#6bb64a;--bg:#f6f8f4;--border:#e8efe3;--muted:#667085}
-*{box-sizing:border-box;font-family:Inter,sans-serif;margin:0;padding:0}
-body{background:var(--bg);max-width:480px;margin:0 auto;padding-bottom:20px}
-.top{background:#fff;padding:14px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center}
-.card{background:#fff;border-radius:20px;margin:12px 14px;padding:16px;border:1px solid var(--border);box-shadow:0 4px 18px rgba(15,74,90,.06)}
-.badge{background:var(--teal);color:#fff;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:800}
-.pill{padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;background:#e8f5e3;color:var(--teal);display:inline-flex;align-items:center;gap:4px;margin:3px}
-.pill.warn{background:#fef3c7;color:#92400e}
-.pill.alert{background:#fee4e2;color:#b42318}
-.avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--green));color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
-input{width:100%;padding:12px;border:1.6px solid #d0d5dd;border-radius:13px;margin:6px 0;font-size:14px}
-.btn{width:100%;padding:13px;border-radius:13px;border:0;font-weight:800;cursor:pointer}
-.btn-teal{background:var(--teal);color:#fff}
-.wellGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
-.wellBox{background:#f8faf6;border:1px solid var(--border);border-radius:14px;padding:10px}
-.wellBox b{font-size:11px;color:var(--muted);text-transform:uppercase;display:block}
-.wellBox span{font-size:14px;font-weight:700;color:var(--teal)}
-.story{background:#f6f8f4;border-left:4px solid var(--green);padding:12px;border-radius:10px;margin:10px 0;font-size:13px;line-height:1.5}
-.treat{padding:8px;border-left:4px solid var(--green);background:#f8faf6;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between;align-items:center}
-.treat.done{border-left-color:var(--teal);background:#e8f5e3}
-.adl{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+<title>KindHeart Family V3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>:root{--teal:#0f4a5a;--green:#22c55e;--bg:#fefcf8}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);padding:14px}
+.hero{background:linear-gradient(135deg,#0f4a5a,#1e7a8a);color:#fff;padding:22px;border-radius:20px}
+.card{background:#fff;border-radius:18px;padding:14px;margin-top:12px;box-shadow:0 4px 14px #0001;border:1px solid #e5e7eb}
+input,button{width:100%;padding:12px;border-radius:12px;border:1px solid #e5e7eb}button{background:var(--teal);color:#fff;font-weight:700;border:0;cursor:pointer}
+.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.green{background:#dcfce7;color:#166534}.amber{background:#fef3c7;color:#92400e}.red{background:#fee2e2;color:#991b1b}
+.progress{height:8px;background:#eee;border-radius:10px;overflow:hidden}.progress>div{height:8px;background:var(--green)}
+.timeline{border-left:2px solid #e5e7eb;margin-left:8px;padding-left:14px}.dot{width:10px;height:10px;background:var(--teal);border-radius:50%;margin-left:-20px;display:inline-block}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 </head><body>
-<div class="top">
-<div style="display:flex;gap:10px;align-items:center"><img src="logo.png" style="width:40px;height:40px;border-radius:10px;object-fit:contain;background:#fff" onerror="this.style.display='none'"><div><b style="color:var(--teal)">KindHeart</b> <span style="color:var(--green)">Family</span><br><small style="color:var(--muted)">Right care at home • Live</small></div></div>
-<div class="badge">Live</div>
-</div>
-
-<div class="card" id="searchCard">
-<input id="cName" list="dlist" placeholder="Type loved one's name e.g Florence" oninput="loadFamily()">
-<datalist id="dlist"></datalist>
-<div style="font-size:11px;color:var(--muted);margin-top:6px">Tip: Use link with?name=Florence for direct access</div>
-</div>
-
-<div id="main" style="display:none">
-<div class="card" style="display:flex;gap:12px;align-items:center">
-<div class="avatar" id="av">FL</div>
-<div style="flex:1"><b id="pName" style="font-size:16px">Florence</b><br><small id="pDiag" style="color:var(--muted)">Diagnosis</small><br><span class="pill" id="pNurse">👩‍⚕️ Nurse: Faith Chebet RN</span></div>
-</div>
-
-<div class="card" id="wellbeingCard">
-<h3 style="font-size:14px;font-weight:800;margin-bottom:8px">💚 Today's Wellbeing</h3>
-<div id="wellDate" style="font-size:11px;color:var(--muted)">No report yet today - nurse will update soon</div>
-<div class="wellGrid" id="wellGrid"></div>
-<div id="adlBox"></div>
-<div id="vitalsBox"></div>
-<div id="storyBox"></div>
-<div id="alertBox"></div>
-</div>
-
-<div class="card">
-<h3 style="font-size:14px;font-weight:800">💊 Treatment Today</h3>
-<div id="sheetBox">Loading...</div>
-<div style="margin-top:8px;font-size:11px;color:var(--muted)">✅ = Given with time - linked to nurse entry</div>
-</div>
-
-<div class="card">
-<h3 style="font-size:14px;font-weight:800">📋 Care History (Last 7 Days)</h3>
-<div id="historyBox">Loading...</div>
-</div>
-
-<div class="card" style="text-align:center">
-<small style="color:var(--muted)">KindHeart Homecare Services<br>Eldoret • Right care at home 🏡<br>Questions? WhatsApp Admin</small>
-<br><button class="btn btn-teal" style="margin-top:10px" onclick="location.reload()">🔄 Refresh Live Data</button>
-</div>
-</div>
-
+<div class="hero"><h2>💛 KindHeart Family</h2><p>Real-time care progress for families abroad</p><input id="searchName" placeholder="Enter loved one's full name"><button onclick="loadFamily()" style="background:#fff;color:#0f4a5a;margin-top:8px">View Progress</button></div>
+<div id="result"></div>
 <script>
 const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
-const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVubHZlbHFlcWJtaGFteXF0enhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwOTM3NDMsImV4cCI6MjA2MDY2OTc0M30.5c3eU0OFOuelYmgIpMWC3TseZCTT_3nAhd1d2nVEbGY";
-const supa=window.supabase.createClient(SB_URL,SB_KEY);
-let currentPatient=null;
-
-function moodEmoji(m){
- if(!m) return '😐';
- if(m.includes('Happy')) return '😊';
- if(m.includes('Calm')) return '😌';
- if(m.includes('Anxious')) return '😟';
- if(m.includes('Low')) return '😔';
- if(m.includes('Confused')) return '😕';
- if(m.includes('Agitated')) return '😠';
- return '💚';
-}
-
-async function init(){
- let {data}=await supa.from('patients').select('patient_id,full_name').order('full_name');
- document.getElementById('dlist').innerHTML=(data||[]).map(c=>`<option value="${c.full_name}">`).join('');
- const urlName=new URLSearchParams(location.search).get('name');
- if(urlName){cName.value=decodeURIComponent(urlName);loadFamily();}
-}
+const SB_KEY="PASTE_ANON_KEY_HERE";
+const supa=supabase.createClient(SB_URL,SB_KEY);
 async function loadFamily(){
- const name=cName.value.trim();if(name.length<2)return;
- let {data:pt,error}=await supa.from('patients').select('*').ilike('full_name','%'+name+'%').limit(1).single();
- if(error||!pt){return;}
- currentPatient=pt;
- document.getElementById('main').style.display='block';
- pName.innerText=pt.full_name;
- pDiag.innerText=pt.diagnosis||'Under Homecare';
- av.innerText=pt.full_name.slice(0,2).toUpperCase();
- pNurse.innerText=`👩‍⚕️ ${pt.assigned_nurse_name||'Not assigned yet'} ${pt.assigned_nurse_role?'('+pt.assigned_nurse_role+')':''}`;
- loadWellbeing();
- loadSheet();
- loadHistory();
-}
-
-async function loadWellbeing(){
- if(!currentPatient)return;
- let {data,error}=await supa.from('daily_sheets').select('*').eq('patient_id',currentPatient.patient_id).order('created_at',{ascending:false}).limit(1).single();
- if(error||!data){
-  wellDate.innerText='No report yet today - nurse will update during visit';
-  wellGrid.innerHTML=''; adlBox.innerHTML=''; vitalsBox.innerHTML=''; storyBox.innerHTML=''; alertBox.innerHTML='';
-  return;
- }
- wellDate.innerText=`Latest update: ${new Date(data.created_at).toLocaleString()} • By ${data.nurse_name||'Nurse'}`;
-
- // WELLBEING GRID
- const painColor = (data.pain_score||0) >=7? 'alert' : (data.pain_score||0)>=4? 'warn' : '';
- wellGrid.innerHTML=`
-  <div class=wellBox><b>Mood</b><span>${moodEmoji(data.mood)} ${data.mood||'-'}</span></div>
-  <div class=wellBox><b>Appetite</b><span>🍽️ ${data.appetite||'-'} ${data.appetite_percent? data.appetite_percent+'%':''}</span></div>
-  <div class=wellBox><b>Sleep</b><span>😴 ${data.sleep_hours||'-'}</span></div>
-  <div class=wellBox><b>Mobility</b><span>🚶 ${data.mobility||'-'}</span></div>
-  <div class=wellBox><b>Hydration</b><span>💧 ${data.hydration_glasses||0} glasses</span></div>
-  <div class=wellBox><b>Pain</b><span class="${painColor}">🩹 ${data.pain_score!=null? data.pain_score+'/10' : '-'}</span></div>
+ let name=document.getElementById('searchName').value.trim();if(!name)return alert('Enter name');
+ document.getElementById('result').innerHTML='Loading premium report...';
+ let {data:patients}=await supa.from('patients').select('*').ilike('full_name','%'+name+'%');if(!patients||!patients.length){document.getElementById('result').innerHTML='<div class="card">❌ No client found</div>';return}
+ let patient=patients[0];let today=new Date().toISOString().split('T')[0];
+ let {data:visitToday}=await supa.from('care_visits').select('*, nurses(full_name)').eq('patient_id',patient.id).eq('visit_date',today).maybeSingle();
+ let {data:tasks}=await supa.from('treatment_tasks').select('*').eq('patient_id',patient.id).order('task_time');
+ let {data:meds}=await supa.from('medications').select('*').eq('patient_id',patient.id).eq('is_active',true);
+ let {data:records}=await supa.from('care_records').select('*, treatment_tasks(title)').eq('patient_id',patient.id).order('completed_at',{ascending:false}).limit(20);
+ let {data:medAdmins}=await supa.from('medication_administrations').select('*, medications(drug_name,dose)').eq('patient_id',patient.id).order('given_at',{ascending:false}).limit(20);
+ let {data:vitals}=await supa.from('vital_signs').select('*').eq('patient_id',patient.id).order('recorded_at',{ascending:false}).limit(5);
+ let {data:notes}=await supa.from('nursing_notes').select('*, nurses(full_name)').eq('patient_id',patient.id).order('created_at',{ascending:false}).limit(5);
+ let latestNote=notes&&notes[0];
+ let todayDone=visitToday? (records.filter(r=>r.care_visit_id===visitToday.id && r.is_completed).length + medAdmins.filter(m=>m.care_visit_id===visitToday.id && m.is_given).length):0;
+ let todayTotal=(tasks?tasks.length:0)+(meds?meds.reduce((s,m)=>(m.times||[]).length,0):0);
+ let pct=todayTotal?Math.round(todayDone/todayTotal*100):0;
+ let statusColor=latestNote?.overall_condition==='Urgent'?'red':latestNote?.overall_condition==='Needs attention'?'amber':'green';
+ let statusText=latestNote?.overall_condition||patient.status||'Stable';
+ document.getElementById('result').innerHTML=`
+ <div class="card"><h3>👤 ${patient.full_name}</h3><span class="badge ${statusColor}">Current: ${statusText} ${statusColor==='green'?'🟢':statusColor==='amber'?'🟡':'🔴'}</span><p><small>${patient.age||''} yrs • ${patient.location||''}<br>Diagnosis: ${patient.diagnosis||'-'}<br>Allergies: ${patient.allergies||'None'}</small></p><p><b>Caregiver Today:</b> ${visitToday?.nurses?.full_name||'Not assigned yet'}</p></div>
+ <div class="card"><h3>Today's Progress - ${today} - ${pct}%</h3><div class="progress"><div style="width:${pct}%"></div></div><small>${todayDone}/${todayTotal} completed</small>
+ <h4 style="margin-top:10px">Tasks</h4><div>${(tasks||[]).map(t=>{let rec=records.find(r=>r.task_id===t.id && r.care_visit_id===visitToday?.id);return `<div style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #f2f4f7"><div>${t.task_time.slice(0,5)} ${t.title}</div><div>${rec?.is_completed?'<span class="badge green">✅ Done</span>':'<span class="badge amber">⏳</span>'}</div></div>`}).join('')||'No tasks'}</div>
+ <h4 style="margin-top:10px">💊 Medications (${meds.length} prescribed)</h4><div>${(meds||[]).map(m=>{let givenToday=medAdmins.filter(a=>a.medication_id===m.id && a.care_visit_id===visitToday?.id);return `<div style="padding:8px;border-bottom:1px solid #f2f4f7"><b>${m.drug_name} ${m.dose}</b> ${m.frequency} - ${m.duration||''}<br><small>${m.instructions||''} • Times: ${(m.times||[]).join(', ')}</small><br><small>${givenToday.map(g=>g.is_given?`✅${g.scheduled_time} ${new Date(g.given_at).toLocaleTimeString().slice(0,5)}`: `⏳${g.scheduled_time}`).join(' | ')||'Pending today'}</small></div>`}).join('')||'No meds'}</div>
+ </div>
+ ${latestNote?`<div class="card" style="border-left:5px solid #22c55e"><h3>Latest Update from Nurse</h3><p><i>"${latestNote.nurse_note||'No note yet'}"</i></p><small>By ${latestNote.nurses?.full_name||'Nurse'} on ${new Date(latestNote.created_at).toLocaleString()} - Condition: ${latestNote.overall_condition}</small></div>`:''}
+ ${vitals&&vitals.length?`<div class="card"><h3>📈 Latest Vitals</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">${vitals.map(v=>`<div style="background:#f9fafb;padding:8px;border-radius:8px"><small>${new Date(v.recorded_at).toLocaleDateString()}</small><br><b>BP:</b> ${v.bp_systolic||'-'}/${v.bp_diastolic||'-'}<br><b>Pulse:</b> ${v.pulse||'-'} <b>Temp:</b> ${v.temperature||'-'}<br><b>SpO2:</b> ${v.spo2||'-'}% <b>Pain:</b> ${v.pain_score||0}/10</div>`).join('')}</div></div>`:''}
+ <div class="card"><h3>📅 Care Timeline</h3><div class="timeline">${(records||[]).slice(0,8).map(r=>`<div style="margin-bottom:10px"><span class="dot"></span><small>${r.completed_at?new Date(r.completed_at).toLocaleString():''}</small><br>${r.treatment_tasks?.title||'Care'} completed</div>`).join('')}${(medAdmins||[]).slice(0,8).map(m=>`<div style="margin-bottom:10px"><span class="dot" style="background:#22c55e"></span><small>${m.given_at?new Date(m.given_at).toLocaleString():''}</small><br>💊 ${m.medications?.drug_name} ${m.medications?.dose} given at ${m.scheduled_time}</div>`).join('')}${(notes||[]).map(n=>`<div style="margin-bottom:10px"><span class="dot" style="background:#f59e0b"></span><small>${new Date(n.created_at).toLocaleString()} by ${n.nurses?.full_name||''}</small><br><b>${n.overall_condition||''}</b>: ${n.nurse_note||''}</div>`).join('')||'No timeline yet'}</div></div>
+ <div class="card" style="background:#0f4a5a;color:#fff"><h3 style="color:#fff">KindHeart Homecare 💛</h3><p>We care with heart<br>📞 +254 700 000 000</p></div>
  `;
-
- // ADL
- if(data.adl_tasks && data.adl_tasks.length){
-  adlBox.innerHTML=`<div style="margin-top:10px"><b style="font-size:12px">🧹 Care Done Today:</b><div class=adl>${data.adl_tasks.map(t=>`<span class=pill>✅ ${t}</span>`).join('')}</div></div>`;
- } else if(data.nursing_cares){
-  adlBox.innerHTML=`<div style="margin-top:10px"><b style="font-size:12px">Care Done:</b><br><small>${data.nursing_cares}</small></div>`;
- } else adlBox.innerHTML='';
-
- // VITALS
- vitalsBox.innerHTML=`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><span class=pill>BP ${data.bp_morning||'-'}</span><span class=pill>HR ${data.hr_morning||'-'}</span><span class=pill>Temp ${data.temp_morning||'-'}</span><span class=pill>${data.avpu||''}</span><span class=pill>💊 Pills left ${data.pills_remaining||0} (${data.days_left||0} days)</span><span class=pill>Input ${data.input_ml||'-'} / Output ${data.output_ml||'-'}</span></div>`;
-
- // STORY
- if(data.day_report){
-  storyBox.innerHTML=`<div class=story><b>📝 Nurse Story:</b><br>"${data.day_report}"</div>`;
- } else storyBox.innerHTML='';
-
- // ALERT
- let alerts=[];
- if((data.pain_score||0)>=7) alerts.push('⚠️ High pain - Nurse alerted');
- if((data.pills_remaining||10) <=3) alerts.push(`⚠️ Low pills - only ${data.pills_remaining} left, ${data.days_left} days`);
- if(alerts.length) alertBox.innerHTML=`<div style="margin-top:8px">${alerts.map(a=>`<span class="pill alert">${a}</span>`).join(' ')}</div>`;
- else alertBox.innerHTML='';
 }
-
-async function loadSheet(){
- if(!currentPatient)return;
- let {data:sheets}=await supa.from('treatment_sheets').select('*').eq('patient_id',currentPatient.patient_id).eq('is_active',true).order('created_at');
- let todayStr=new Date().toISOString().split('T')[0];
- let {data:logs}=await supa.from('treatment_logs').select('treatment_id,given_at').eq('patient_id',currentPatient.patient_id).eq('date',todayStr);
- const givenIds=new Set((logs||[]).map(l=>l.treatment_id));
- const logMap={};(logs||[]).forEach(l=>logMap[l.treatment_id]=l.given_at);
- sheetBox.innerHTML=(sheets||[]).map(s=>{
-  const isDone=givenIds.has(s.id);
-  const time=logMap[s.id]? new Date(logMap[s.id]).toLocaleTimeString() : '';
-  return `<div class="treat ${isDone?'done':''}"><div><b>${s.drug_name}</b> ${s.dosage||''} <small>${s.times||''} ${s.frequency||''}</small></div><div style="text-align:right"><div style="font-size:16px">${isDone?'✅':'⏳'}</div><small style="font-size:10px">${time}</small></div></div>`;
- }).join('')||'No active treatment - Admin will add';
-}
-
-async function loadHistory(){
- if(!currentPatient)return;
- let {data}=await supa.from('daily_sheets').select('*').eq('patient_id',currentPatient.patient_id).order('created_at',{ascending:false}).limit(7);
- if(!data||!data.length){historyBox.innerHTML='No history yet';return;}
- historyBox.innerHTML=data.map(r=>`<div style="padding:10px 0;border-bottom:1px solid #f2f4f7"><small style="color:var(--muted)">${new Date(r.created_at).toLocaleDateString()} • ${r.nurse_name||'Nurse'}</small><br><span class=pill>${moodEmoji(r.mood)} ${r.mood||''}</span> <span class=pill>🍽️ ${r.appetite||''}</span> <span class=pill>🩹 ${r.pain_score||0}/10</span><br><small>${r.day_report||''}</small></div>`).join('');
-}
-init();
+let qp=new URLSearchParams(window.location.search);if(qp.get('name')){document.getElementById('searchName').value=qp.get('name');loadFamily();}
 </script></body></html>
