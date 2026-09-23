@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nurse Entry - KindHeart</title>
+<style>body{font-family:system-ui;padding:16px;max-width:600px;margin:auto;background:#f8fafc}input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px}button{background:#0e7a5c;color:#fff;padding:14px;width:100%;border:0;border-radius:10px;font-weight:700}.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
+<h2 style="color:#0e7a5c">KindHeart Nurse Entry</h2><div class="card">
+<label>Patient ID</label><input id="pid" value="KH-001">
+<label>AVPU</label><select id="avpu"><option>Alert</option><option>Voice</option><option>Pain</option><option>Unresponsive</option></select>
+<label>BP Morning</label><input id="bp" placeholder="120/80">
+<label>HR</label><input id="hr" type="number"><label>Temp °C</label><input id="temp" type="number" step="0.1">
+<label>Glucose</label><input id="glu" type="number" step="0.1">
+<label>Input ml</label><input id="inputml" type="number"><label>Output ml</label><input id="outputml" type="number">
+<label>Pills Remaining</label><input id="pills" type="number">
+<label>Nursing Cares Done</label><textarea id="cares"></textarea>
+<label>Sleep Hours</label><input id="sleep" type="number" step="0.5">
+<label>Sleep Quality</label><select id="sleepq"><option>Good</option><option>Fair</option><option>Poor</option><option>Restless</option></select>
+<label>Day Report</label><textarea id="report" rows="4"></textarea>
+<button onclick="save()">SAVE REPORT</button><p id="msg"></p></div>
+<script>
+const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
+const supabase=window.supabase.createClient(URL,KEY);
+async function save(){const pills=parseInt(document.getElementById('pills').value||0);const days=Math.floor(pills/2);
+const d={patient_id:pid.value.trim(),avpu:avpu.value,bp_morning:bp.value,hr_morning:+hr.value,temp_morning:+temp.value,glucose_morning:+glu.value,input_ml:+inputml.value,output_ml:+outputml.value,pills_remaining:pills,days_left:days,nursing_cares:cares.value,sleep_hours:+sleep.value,sleep_quality:sleepq.value,day_report:report.value};
+const {error}=await supabase.from('daily_sheets').insert([d]);msg.innerText=error?error.message:'✅ Saved! Days left: '+days+' - Auto alert if <5 days';}
+</script></body></html>
