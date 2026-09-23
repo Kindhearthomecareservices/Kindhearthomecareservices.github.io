@@ -1,24 +1,19 @@
 <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nurse Entry - KindHeart</title>
-<style>body{font-family:system-ui;padding:16px;max-width:600px;margin:auto;background:#f8fafc}input,select,textarea{width:100%;padding:11px;margin:6px 0 12px;border:1px solid #ccc;border-radius:8px}button{background:#0e7a5c;color:#fff;padding:14px;width:100%;border:0;border-radius:10px;font-weight:700}.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}</style>
+<title>Nurse Premium</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{--g:#0f3d2e;--bg:#f6f7f4}*{font-family:Inter;box-sizing:border-box}body{background:var(--bg);margin:0;padding:12px}
+.header{background:var(--g);color:#fff;padding:16px;border-radius:18px}.card{background:#fff;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 6px 20px rgba(0,0,0,.06)} input,select,textarea{width:100%;padding:11px;border:1px solid #d0d5dd;border-radius:12px;margin:6px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.treat{border-left:4px solid var(--g);padding:10px;background:#f8faf8;border-radius:10px;margin:8px 0}.btn{width:100%;padding:14px;border-radius:14px;border:0;background:var(--g);color:#fff;font-weight:800}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
-<h2 style="color:#0e7a5c">KindHeart Nurse Entry</h2><div class="card">
-<label>Patient ID</label><input id="pid" value="KH-001">
-<label>AVPU</label><select id="avpu"><option>Alert</option><option>Voice</option><option>Pain</option><option>Unresponsive</option></select>
-<label>BP Morning</label><input id="bp" placeholder="120/80">
-<label>HR</label><input id="hr" type="number"><label>Temp °C</label><input id="temp" type="number" step="0.1">
-<label>Glucose</label><input id="glu" type="number" step="0.1">
-<label>Input ml</label><input id="inputml" type="number"><label>Output ml</label><input id="outputml" type="number">
-<label>Pills Remaining</label><input id="pills" type="number">
-<label>Nursing Cares Done</label><textarea id="cares"></textarea>
-<label>Sleep Hours</label><input id="sleep" type="number" step="0.5">
-<label>Sleep Quality</label><select id="sleepq"><option>Good</option><option>Fair</option><option>Poor</option><option>Restless</option></select>
-<label>Day Report</label><textarea id="report" rows="4"></textarea>
-<button onclick="save()">SAVE REPORT</button><p id="msg"></p></div>
+<div class="header"><b>KindHeart Nurse Entry</b><br><small id="nurseInfo">Loading...</small></div>
+<div class="card"><input id="pid" placeholder="Patient ID KH-001" onchange="loadPatient()"><div id="pinfo"></div></div>
+<div class="card"><b>Treatment Sheet - Tick when given</b><div id="treats">Enter ID</div></div>
+<div class="card"><b>Vital Signs</b><div class="grid2"><select id="avpu"><option>Alert</option><option>Voice</option><option>Pain</option><option>Unresponsive</option></select><input id="bp" placeholder="BP 120/80"></div><div class="grid2"><input id="hr" placeholder="HR 78"><input id="temp" placeholder="Temp 36.5"></div><div class="grid2"><input id="gluc" placeholder="Glucose"><input id="spo2" placeholder="SpO2 %"></div><div class="grid2"><input id="input" placeholder="Input ml"><input id="output" placeholder="Output ml"></div><div class="grid2"><input id="pills" type="number" placeholder="Pills left"><input id="days" readonly placeholder="Days left"></div></div>
+<div class="card"><b>Nursing Care Done</b><textarea id="care" placeholder="Bed bath, dressing..."></textarea><div class="grid2"><input id="sleepH" placeholder="Sleep hours"><select id="sleepQ"><option>Good</option><option>Poor</option><option>Interrupted</option></select></div></div>
+<div class="card"><b>Day Report / Brief</b><textarea id="report"></textarea><button class="btn" onclick="saveAll()">✓ Save & Submit</button><p id="msg"></p></div>
 <script>
-const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
-const supabase=window.supabase.createClient(URL,KEY);
-async function save(){const pills=parseInt(document.getElementById('pills').value||0);const days=Math.floor(pills/2);
-const d={patient_id:pid.value.trim(),avpu:avpu.value,bp_morning:bp.value,hr_morning:+hr.value,temp_morning:+temp.value,glucose_morning:+glu.value,input_ml:+inputml.value,output_ml:+outputml.value,pills_remaining:pills,days_left:days,nursing_cares:cares.value,sleep_hours:+sleep.value,sleep_quality:sleepq.value,day_report:report.value};
-const {error}=await supabase.from('daily_sheets').insert([d]);msg.innerText=error?error.message:'✅ Saved! Days left: '+days+' - Auto alert if <5 days';}
+const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw"; const S=window.supabase.createClient(URL,KEY); let treatments=[];
+function calc(){let p=parseInt(pills.value)||0; days.value=Math.floor(p/(treatments.length||2));} pills.addEventListener('input',calc);
+async function loadPatient(){let id=pid.value.trim(); if(!id)return; const {data:pt}=await S.from('patients').select('*').eq('patient_id',id).single(); pinfo.innerHTML=pt?`👤 ${pt.full_name} | ${pt.diagnosis}<br>👩‍⚕️ Assigned: <b>${pt.assigned_nurse_name||'Not assigned'} (${pt.assigned_nurse_role||''})</b> - ${pt.assigned_nurse_phone||''}`:'Not found'; document.getElementById('nurseInfo').innerText=pt?`Caring for ${pt.full_name} - ${pt.assigned_nurse_name||''}`:''; const {data:tr}=await S.from('treatment_sheets').select('*').eq('patient_id',id).eq('is_active',true); treatments=tr||[]; treats.innerHTML=treatments.map(t=>`<div class=treat><b>${t.drug_name} ${t.dosage} ${t.frequency}</b><br><small>${t.times} | ${t.instructions||''}</small><br><label><input type=checkbox class=tick data-id=${t.id} value=Morning> Morning</label> <label><input type=checkbox class=tick data-id=${t.id} value=Afternoon> Afternoon</label> <label><input type=checkbox class=tick data-id=${t.id} value=Evening> Evening</label> <label><input type=checkbox class=tick data-id=${t.id} value=Night> Night</label></div>`).join('')||'No sheet set'; calc();}
+async function saveAll(){let id=pid.value.trim(); if(!id)return; const sheet={patient_id:id,avpu:avpu.value,bp_morning:bp.value,hr_morning:hr.value,temp_morning:temp.value,glucose_morning:gluc.value,input_ml:input.value,output_ml:output.value,pills_remaining:parseInt(pills.value)||0,days_left:parseInt(days.value)||0,nursing_cares:care.value,sleep_hours:sleepH.value,sleep_quality:sleepQ.value,day_report:report.value}; const {error}=await S.from('daily_sheets').insert(sheet); if(error){msg.innerText=error.message;return} let ticks=[...document.querySelectorAll('.tick:checked')]; for(let c of ticks){await S.from('treatment_logs').insert({patient_id:id,treatment_id:c.dataset.id,given_time_slot:c.value});} msg.innerText='✅ Saved '+ticks.length+' ticks'; care.value=''; report.value='';}
+(function(){let id=new URLSearchParams(location.search).get('id'); if(id){pid.value=id; loadPatient();}})();
 </script></body></html>
