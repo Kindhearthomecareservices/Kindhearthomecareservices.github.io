@@ -1,14 +1,42 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin - KindHeart</title><style>body{font-family:system-ui;padding:16px;background:#f1f5f9}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}.card{background:#fff;padding:14px;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.05)}.badge{padding:4px 8px;border-radius:20px;font-size:12px;font-weight:700}.low{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
-<script>if(prompt('Enter Admin PIN')!='2024'){alert('Wrong PIN');location.href='/';}</script>
-<h2 style="color:#0f172a">KindHeart Admin Dashboard</h2><button onclick="load()" style="padding:8px 16px;border-radius:8px;border:0;background:#0f172a;color:#fff">Refresh</button>
-<div id="stats" class="card" style="margin:12px 0"></div><div id="grid" class="grid"></div>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KindHeart Admin Premium</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{--g:#0f3d2e;--g2:#14b87a;--bg:#f6f7f4}*{font-family:Inter,sans-serif;box-sizing:border-box}body{background:var(--bg);margin:0;padding:14px;color:#101828}
+.header{background:var(--g);color:#fff;padding:18px;border-radius:18px;display:flex;justify-content:space-between;align-items:center}
+.card{background:#fff;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 8px 24px rgba(16,24,40,.06);border:1px solid #eef2e7}
+input,select,textarea{width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:12px;margin:6px 0;font-size:14px}
+.btn{padding:12px 16px;border-radius:12px;border:0;font-weight:700;cursor:pointer;width:100%}.btn-g{background:var(--g);color:#fff}.btn-o{background:#fff;border:1px solid var(--g);color:var(--g)}
+.row{display:flex;gap:10px}.row>*{flex:1}.pill{padding:6px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#ecfdf3;color:var(--g);border:1px solid #a6f4c5}
+.client{display:flex;gap:12px;align-items:center}.avatar{width:44px;height:44px;border-radius:50%;background:var(--g);color:#fff;display:grid;place-items:center;font-weight:800}
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body>
+<script>if(prompt('Admin PIN')!=='2024'){location.href='/';}</script>
+<div class="header"><div><b>KindHeart Admin</b><br><small style="opacity:.8">Premium Care Control</small></div><div>🔔</div></div>
+
+<div class="card"><b>Add New Client</b>
+<div class="row"><input id="pid" placeholder="ID KH-001"><input id="age" placeholder="Age"></div>
+<input id="fname" placeholder="Full Name"><div class="row"><input id="gender" placeholder="Gender"><input id="diag" placeholder="Diagnosis"></div>
+<input id="famname" placeholder="Family Contact Name"><input id="famphone" placeholder="Family WhatsApp 07..."><input id="addr" placeholder="Estate / Address">
+<button class="btn btn-g" onclick="addClient()">Save Client</button><p id="cmsg"></p></div>
+
+<div class="card"><b>Staff Directory - Add Nurse / Caregiver</b>
+<div class="row"><input id="sname" placeholder="Name e.g Faith Chebet"><input id="srole" placeholder="Role Nurse/Caregiver"></div>
+<div class="row"><input id="sphone" placeholder="Phone 07..."><input id="sid" placeholder="ID No"></div>
+<button class="btn btn-o" onclick="addStaff()">+ Add Staff</button><div id="staffList"></div></div>
+
+<div class="card"><b>Assign Caregiver + Build Treatment Sheet</b>
+<input id="t_pid" placeholder="Patient ID e.g KH-001" onchange="viewSheet()"><select id="nurseSelect"><option>Select Nurse/Caregiver to assign</option></select>
+<button class="btn btn-g" onclick="assignNurse()">Assign to Client → Family will see this</button>
+<div class="row" style="margin-top:10px"><input id="drug" placeholder="Drug Amlodipine"><input id="dose" placeholder="5mg"></div>
+<div class="row"><input id="freq" placeholder="BD / TDS"><input id="route" placeholder="PO"><input id="times" placeholder="Morning, Evening"></div>
+<input id="instr" placeholder="Instructions"><button class="btn btn-o" onclick="addMed()">+ Add to Treatment Sheet</button><div id="sheetPreview"></div></div>
+
+<div class="card"><b>Clients</b><div id="clients"></div></div>
+
 <script>
-const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
-const supabase=window.supabase.createClient(URL,KEY);
-async function load(){const {data,error}=await supabase.from('daily_sheets').select('*').order('created_at',{ascending:false}).limit(100);
-if(error){stats.innerText=error.message;return}const latest={};data.forEach(r=>{if(!latest[r.patient_id])latest[r.patient_id]=r});const ps=Object.values(latest);
-stats.innerHTML=`Active Patients: ${ps.length} | Low Stock (<5 days): ${ps.filter(p=>p.days_left<=4).length}`;
-grid.innerHTML=ps.map(p=>`<div class=card><h3>${p.patient_id} <span class="badge ${p.days_left<=4?'low':'ok'}">${p.pills_remaining} left</span></h3><p>${new Date(p.created_at).toLocaleString()} | BP:${p.bp_morning} | ${p.avpu}</p><p>${(p.day_report||'').slice(0,120)}...</p><p><a href="family-view.html?id=${p.patient_id}" target="_blank">Open Family Link</a></p></div>`).join('')||'No reports yet - ask nurse to submit one';}load();
+const URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw"; const S=window.supabase.createClient(URL,KEY);
+async function addClient(){const d={patient_id:pid.value.trim(),full_name:fname.value,age:parseInt(age.value)||null,gender:gender.value,diagnosis:diag.value,family_name:famname.value,family_phone:famphone.value,address:addr.value}; const {error}=await S.from('patients').upsert(d); cmsg.innerText=error?error.message:'✅ Client saved'; load();}
+async function addStaff(){const d={name:sname.value,role:srole.value,phone:sphone.value,id_number:sid.value}; const {error}=await S.from('staff').insert(d); if(!error){sname.value=''; load();}}
+async function assignNurse(){let sel=nurseSelect.value.split('|'); if(sel.length<2)return alert('Select nurse'); const d={assigned_nurse_name:sel[0],assigned_nurse_phone:sel[1],assigned_nurse_role:sel[2]}; const {error}=await S.from('patients').update(d).eq('patient_id',t_pid.value.trim()); if(!error)alert('✅ Assigned '+sel[0]+' to '+t_pid.value); load();}
+async function addMed(){const d={patient_id:t_pid.value.trim(),drug_name:drug.value,dosage:dose.value,frequency:freq.value,route:route.value,times:times.value,instructions:instr.value}; const {error}=await S.from('treatment_sheets').insert(d); if(!error){drug.value=''; viewSheet();}}
+async function viewSheet(){if(!t_pid.value)return; const {data}=await S.from('treatment_sheets').select('*').eq('patient_id',t_pid.value.trim()).eq('is_active',true); sheetPreview.innerHTML=(data||[]).map(m=>`• ${m.drug_name} ${m.dosage} ${m.frequency} <small>${m.times}</small>`).join('<br>')||'No meds';}
+async function load(){const {data:staff}=await S.from('staff').select('*').eq('active',true); staffList.innerHTML=(staff||[]).map(s=>`<span class=pill>${s.name} - ${s.role}</span>`).join(' '); nurseSelect.innerHTML='<option>Select Nurse/Caregiver</option>'+ (staff||[]).map(s=>`<option value="${s.name}|${s.phone}|${s.role}">${s.name} (${s.role})</option>`).join(''); const {data:p}=await S.from('patients').select('*').order('created_at',{ascending:false}); clients.innerHTML=(p||[]).map(c=>`<div class=client style="justify-content:space-between;border-bottom:1px solid #eee;padding:10px 0"><div class=client><div class=avatar>${(c.full_name||'K').slice(0,2).toUpperCase()}</div><div><b>${c.patient_id} - ${c.full_name}</b><br><small>${c.diagnosis||''} | 👩‍⚕️ ${c.assigned_nurse_name||'Not assigned'}</small></div></div><div><a href="nurse-entry.html?id=${c.patient_id}">Nurse</a> | <a href="family-view.html?id=${c.patient_id}">Family</a></div></div>`).join('');}load();
 </script></body></html>
