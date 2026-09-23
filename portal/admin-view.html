@@ -1,187 +1,222 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KindHeart Admin - Premium</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>KindHeart Admin - Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;font-family:Inter,system-ui} body{margin:0;background:#f6f8f7;padding-bottom:90px}
-.header{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:10}
-.logo{display:flex;gap:8px;align-items:center}.logo img{height:36px}
-.badge{background:#0f4a5a;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700}
-.card{background:#fff;margin:12px;border-radius:20px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,.06)}
-.stat{display:flex;gap:12px}.stat div{flex:1;padding:14px;border-radius:16px}.s1{background:#e8f5e9}.s2{background:#e3f2fd}
-input,select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:12px;margin:6px 0;font-size:14px}
-.btn{width:100%;padding:13px;border:none;border-radius:12px;font-weight:700;cursor:pointer;margin-top:8px}
-.btn-teal{background:#0f4a5a;color:#fff}.btn-green{background:#6bb64a;color:#fff}.btn-outline{background:#fff;border:2px solid #0f4a5a;color:#0f4a5a}
-.nav{position:fixed;bottom:12px;left:12px;right:12px;background:#fff;display:flex;justify-content:space-around;padding:10px;border-radius:24px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:20}
-.nav button{border:none;background:0;flex:1;padding:6px;font-size:12px;color:#6b7280}.nav button.active{color:#0f4a5a;font-weight:800}
-.tab{display:none}.tab.active{display:block;animation:fade.2s} @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.client-row{display:flex;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #f3f4f6}
-.avatar{width:36px;height:36px;border-radius:50%;background:#0f4a5a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+:root{--teal:#0f4a5a;--green:#6bb64a;--bg:#f6f8f4;--card:#fff;--border:#e8efe3;--muted:#667085}
+*{box-sizing:border-box;font-family:Inter,sans-serif;margin:0;padding:0}
+body{background:var(--bg);max-width:480px;margin:0 auto;padding-bottom:110px}
+.top{position:sticky;top:0;z-index:50;background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:40px;height:40px;border-radius:8px;object-fit:contain;background:#fff}
+.card{background:var(--card);border-radius:20px;margin:12px 14px;padding:16px;border:1px solid var(--border);box-shadow:0 4px 18px rgba(15,74,90,.06)}
+.card h3{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between}
+input,select,textarea{width:100%;padding:12px 13px;border:1.6px solid #d0d5dd;border-radius:13px;margin:6px 0;font-size:14px;background:#fff;outline:none}
+input:focus,select:focus{border-color:var(--green)}
+.btn{width:100%;padding:13px;border-radius:13px;border:0;font-weight:800;font-size:14px;cursor:pointer;margin-top:6px}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-outline{background:#fff;border:1.6px solid var(--teal);color:var(--teal)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:#e8f5e3;color:var(--teal);border:1px solid #c9e8ba}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--green));color:#fff;display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.client{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #f2f4f7}
+.treat{padding:10px;border-left:4px solid var(--green);background:#f8faf6;border-radius:10px;margin:6px 0}
+.badge{background:var(--teal);color:#fff;padding:5px 11px;border-radius:99px;font-size:11px;font-weight:800}
+.pages .page{display:none}.pages .page.active{display:block;animation:fade .2s}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100;border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.08)}
+.tabBtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;padding:6px;border-radius:12px}
+.tabBtn.active{color:var(--teal);background:#e8f5e3}
+.tabBtn span{font-size:20px}
 </style>
-</head>
-<body>
-<div class="header">
- <div class="logo"><img src="logo.png" onerror="this.style.display='none'"><div><b style="color:#0f4a5a">KindHeart</b> <b style="color:#6bb64a">Admin</b><div style="font-size:10px;color:#6b7280">Right care at home • Premium</div></div></div>
- <div class="badge" id="topBadge">0 Clients</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+</head><body>
+<div class="top"><div class="logo"><img src="logo.png" onerror="this.style.display='none'"><div><div style="font-weight:800;color:var(--teal)">KindHeart <span style="color:var(--green)">Admin</span></div><small style="color:var(--muted)">Right care at home • Premium</small></div></div><div class="badge" id="topCount">0 Clients</div></div>
+
+<div class="pages">
+<!-- HOME -->
+<div id="p-home" class="page active">
+<div class="card"><div class="row"><div style="background:#e8f5e3;padding:12px;border-radius:14px;flex:1"><small style="color:var(--muted)">Total Clients</small><div id="sClients" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div><div style="background:#eaf2ff;padding:12px;border-radius:14px;flex:1"><small style="color:var(--muted)">Active Staff</small><div id="sStaff" style="font-size:22px;font-weight:800;color:var(--teal)">0</div></div></div></div>
+
+<div class="card"><h3>➕ Add New Client <span style="font-weight:600;color:var(--muted);font-size:11px">No ID needed</span></h3>
+<input id="fname" placeholder="Full Name e.g Steve Torotich"><div class="row"><input id="age" type="number" placeholder="Age"><select id="gender"><option value="">Gender</option><option>Male</option><option>Female</option></select></div>
+<input id="diag" placeholder="Diagnosis e.g Hypertension"><input id="famname" placeholder="Family Contact Name"><input id="famphone" placeholder="Family WhatsApp 07..."><input id="addr" placeholder="Address - Estate, Eldoret">
+<button class="btn btn-teal" onclick="addClient()">Save Client</button><div id="cmsg" style="margin-top:8px;font-weight:700;font-size:12px"></div></div>
+
+<div class="card"><h3>💊 Quick Assign & Treatment</h3>
+<input id="cName" list="dlist" placeholder="Type Client Name" oninput="loadSheet()"><datalist id="dlist"></datalist>
+
+<div class="row">
+<select id="roleFilter" onchange="filterNurses()"><option value="all">All Roles</option><option value="nurse">Nurses Only</option><option value="caregiver">Caregivers Only</option></select>
+<select id="nurseSel"><option value="">Select Staff</option></select>
+</div>
+<button class="btn btn-green" onclick="assignStaff()">Assign Selected → Family will see name</button>
+<div id="assignMsg" style="font-size:12px;font-weight:700;margin-top:6px"></div>
+
+<div style="margin-top:12px;border-top:1px dashed #e5e7eb;padding-top:10px">
+<div class="row"><input id="drug" placeholder="Drug e.g Amlodipine"><input id="dose" placeholder="5mg"></div>
+<div class="row"><select id="freq"><option value="">Freq</option><option>OD</option><option>BD</option><option>TDS</option></select><input id="times" placeholder="Morning, Evening"></div>
+<button class="btn btn-outline" onclick="addTreatment()">+ Add to Treatment Sheet</button>
+<div id="sheetPreview" style="margin-top:10px"></div>
+</div>
+</div>
 </div>
 
-<!-- HOME TAB -->
-<div id="tab-home" class="tab active">
- <div class="card stat"><div class="s1"><small>Total Clients</small><h2 id="cTotal" style="margin:4px 0;color:#0f4a5a">0</h2></div><div class="s2"><small>Active Nurses</small><h2 id="cNurse" style="margin:4px 0;color:#0f4a5a">0</h2></div></div>
-
- <div class="card">
-  <b>➕ Add New Client</b> <small style="float:right;color:#6b7280">No ID needed - Use Name</small>
-  <input id="p_name" placeholder="Full Name e.g Steve Torotich">
-  <div style="display:flex;gap:8px"><input id="p_age" placeholder="Age" type="number"><select id="p_gender"><option value="">Male / Female</option><option>Male</option><option>Female</option></select></div>
-  <input id="p_diag" placeholder="Diagnosis e.g Flu, Hypertension">
-  <input id="p_family" placeholder="Family Contact Name">
-  <input id="p_phone" placeholder="Family WhatsApp 07...">
-  <input id="p_addr" placeholder="Address - Estate, Eldoret">
-  <button type="button" class="btn btn-teal" onclick="addClient()">Save Client</button>
-  <div id="msgClient" style="font-size:12px;margin-top:6px"></div>
- </div>
-
- <div class="card">
-  <b>💊 Quick Assign & Treatment</b>
-  <input id="q_client" placeholder="Type Client Name" list="clientsList"><datalist id="clientsList"></datalist>
-  <select id="q_staff"><option value="">Select Nurse / Caregiver</option></select>
-  <button type="button" class="btn btn-green" onclick="assignStaff()">Assign Nurse → Family will see name</button>
-  <div id="msgAssign" style="font-size:12px;margin-top:6px"></div>
-  <div style="display:flex;gap:8px;margin-top:12px"><input id="d_name" placeholder="Drug e.g Amlodipine"><input id="d_dose" placeholder="5mg"></div>
-  <div style="display:flex;gap:8px"><input id="d_freq" placeholder="BD / OD"><input id="d_times" placeholder="Morning, Evening"></div>
-  <button type="button" class="btn btn-outline" onclick="addTreatment()">+ Add to Treatment Sheet</button>
-  <div id="msgTreat" style="font-size:12px;margin-top:6px"></div>
- </div>
+<!-- CLIENTS -->
+<div id="p-clients" class="page">
+<div class="card"><h3>👥 All Clients <input id="search" placeholder="🔍 Search..." style="margin:0;padding:8px 10px" oninput="filterClients()"></h3><div id="listClients">Loading...</div></div>
 </div>
 
-<!-- CLIENTS TAB -->
-<div id="tab-clients" class="tab">
- <div class="card"><b>👥 All Clients</b><input id="searchClient" placeholder="Search client..." oninput="renderClients()"><div id="listClients" style="margin-top:10px"></div></div>
+<!-- STAFF -->
+<div id="p-staff" class="page">
+<div class="card"><h3>👩‍⚕️ Add Staff (Nurse / Caregiver)</h3>
+<div class="row"><input id="sname" placeholder="Name e.g Faith Chebet"><select id="srole"><option>Nurse</option><option>Caregiver</option><option>RN</option><option>Care Assistant</option></select></div>
+<div class="row"><input id="sphone" placeholder="Phone 07..."><input id="sid" placeholder="ID No"></div>
+<button class="btn btn-outline" onclick="addStaff()">+ Add Staff</button></div>
+<div class="card"><h3>Staff List</h3><div id="listStaff"></div></div>
 </div>
 
-<!-- STAFF TAB -->
-<div id="tab-staff" class="tab">
- <div class="card"><b>👩‍⚕️ Add Staff (Nurse or Caregiver)</b>
-  <input id="s_name" placeholder="Name e.g Faith Chebet">
-  <select id="s_role"><option>Nurse</option><option>RN</option><option>Caregiver</option><option>Clinical Officer</option></select>
-  <input id="s_phone" placeholder="Phone 07..."><input id="s_id" placeholder="ID Number">
-  <button type="button" class="btn btn-teal" onclick="addStaff()">Save Staff</button><div id="msgStaff"></div>
- </div>
- <div class="card"><b>Staff List</b><div id="listStaff"></div></div>
+<!-- SHEETS -->
+<div id="p-sheets" class="page"><div class="card"><h3>💊 All Treatment Sheets</h3><div id="allSheets">Loading...</div></div></div>
+
+<!-- REPORTS - NEW FOR ADMIN -->
+<div id="p-reports" class="page">
+<div class="card"><h3>📋 Nurse Daily Reports (Admin View)</h3><div id="reportList">Loading...</div></div>
 </div>
 
-<!-- SHEETS TAB -->
-<div id="tab-sheets" class="tab">
- <div class="card"><b>💊 Treatment Sheets</b><div id="listSheets"></div></div>
 </div>
 
-<div class="nav">
- <button id="b-home" class="active" onclick="switchTab('home')">🏠<br>Home</button>
- <button id="b-clients" onclick="switchTab('clients')">👥<br>Clients</button>
- <button id="b-staff" onclick="switchTab('staff')">👩‍⚕️<br>Staff</button>
- <button id="b-sheets" onclick="switchTab('sheets')">📋<br>Sheets</button>
+<!-- TABS -->
+<div class="bottomNav">
+<div class="tabBtn active" onclick="openTab('p-home',this)"><span>🏠</span>Home</div>
+<div class="tabBtn" onclick="openTab('p-clients',this)"><span>👥</span>Clients</div>
+<div class="tabBtn" onclick="openTab('p-staff',this)"><span>👩‍⚕️</span>Staff</div>
+<div class="tabBtn" onclick="openTab('p-sheets',this)"><span>💊</span>Sheets</div>
+<div class="tabBtn" onclick="openTab('p-reports',this)"><span>📋</span>Reports</div>
 </div>
 
 <script>
-const SUPA_URL="https://zifbnupmwizhhughupcu.supabase.co";
-const SUPA_KEY="sb_publishable_Jn4BvMhT0V1Gk2o6N0o6_5d5a5a5a5a";
-const ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppZmJudXBt d2l6aGh1Z2h1cGN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MTgwNzUsImV4cCI6MjA3NDM5NDA3NX0.pZ1cZzZzZzZzZzZzZzZ";
-const S = supabase.createClient(SUPA_URL, ANON);
+const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
+const SB_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
+const supa = window.supabase.createClient(SB_URL, SB_KEY);
+let allClients=[], allStaff=[], staffFiltered=[];
 
-let allPatients=[], allStaff=[];
-function switchTab(t){
- document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
- document.getElementById('tab-'+t).classList.add('active');
- document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
- document.getElementById('b-'+t).classList.add('active');
- window.scrollTo(0,0);
- if(t==='clients') renderClients();
- if(t==='staff') renderStaff();
- if(t==='sheets') loadSheets();
+function openTab(id, el){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+ el.classList.add('active');
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(id==='p-reports') loadReports();
 }
 
-async function init(){
- const {data:p}=await S.from('patients').select('*').order('created_at',{ascending:false});
- allPatients=p||[];
- const {data:s}=await S.from('staff').select('*').order('created_at',{ascending:false});
- allStaff=s||[];
- document.getElementById('cTotal').innerText=allPatients.length;
- document.getElementById('cNurse').innerText=allStaff.length;
- document.getElementById('topBadge').innerText=allPatients.length+' Clients';
- // populate datalist and dropdown
- const dl=document.getElementById('clientsList'); dl.innerHTML='';
- const qStaff=document.getElementById('q_staff'); qStaff.innerHTML='<option value=\"\">Select Nurse / Caregiver</option>';
- allPatients.forEach(p=>{ let o=document.createElement('option'); o.value=p.full_name; dl.appendChild(o); });
- allStaff.forEach(st=>{
-   let opt=document.createElement('option');
-   opt.value=JSON.stringify(st);
-   opt.textContent=st.name+' - '+st.role+' ('+(st.role.toLowerCase().includes('care')?'Caregiver':'Nurse')+')';
-   qStaff.appendChild(opt);
- });
- renderClients(); renderStaff(); loadSheets();
-}
-
-function renderClients(){
- const q=(document.getElementById('searchClient')?.value||'').toLowerCase();
- const c=document.getElementById('listClients'); c.innerHTML='';
- allPatients.filter(p=>p.full_name.toLowerCase().includes(q)).forEach(p=>{
-  const ini=p.full_name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
-  c.innerHTML+=`<div class="client-row"><div class="avatar">${ini}</div><div style="flex:1"><b>${p.full_name}</b><div style="font-size:11px;color:#6b7280">${p.diagnosis||''} • ${p.assigned_nurse_name||'Not assigned'}</div></div><a href="family-view.html?name=${encodeURIComponent(p.full_name)}" style="font-size:11px">Family</a></div>`;
- });
-}
-function renderStaff(){
- const c=document.getElementById('listStaff'); c.innerHTML='';
- allStaff.forEach(s=>{
-  c.innerHTML+=`<div class="client-row"><div class="avatar" style="background:#6bb64a">${s.name[0]}</div><div style="flex:1"><b>${s.name}</b><div style="font-size:11px">${s.role} • ${s.phone}</div></div></div>`;
- });
-}
+function makeId(name){ return 'KH-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,15)+'-'+Date.now().toString().slice(-4); }
 
 async function addClient(){
- const name=document.getElementById('p_name').value.trim(); if(!name) return alert('Enter name');
- const pid=name.toLowerCase().replace(/\s+/g,'_');
- const row={patient_id:pid, full_name:name, age:parseInt(document.getElementById('p_age').value)||null, gender:document.getElementById('p_gender').value, diagnosis:document.getElementById('p_diag').value, family_name:document.getElementById('p_family').value, family_phone:document.getElementById('p_phone').value, address:document.getElementById('p_addr').value};
- document.getElementById('msgClient').innerText='Saving...';
- const {error}=await S.from('patients').upsert(row,{onConflict:'patient_id'});
- document.getElementById('msgClient').innerText=error?'❌ '+error.message:'✅ Added '+name;
- if(!error){ document.getElementById('p_name').value=''; init(); }
+ const name=document.getElementById('fname').value.trim();
+ if(!name){ alert('Enter full name'); return; }
+ document.getElementById('cmsg').innerText='Saving...';
+ try{
+  const pid=makeId(name);
+  const {error}=await supa.from('patients').insert({
+   patient_id:pid, full_name:name,
+   age:parseInt(document.getElementById('age').value)||null,
+   gender:document.getElementById('gender').value,
+   diagnosis:document.getElementById('diag').value,
+   family_name:document.getElementById('famname').value,
+   family_phone:document.getElementById('famphone').value,
+   address:document.getElementById('addr').value
+  });
+  if(error) throw error;
+  document.getElementById('cmsg').innerText='✅ Saved '+name;
+  document.getElementById('fname').value=''; document.getElementById('age').value=''; document.getElementById('diag').value=''; document.getElementById('famname').value=''; document.getElementById('famphone').value=''; document.getElementById('addr').value='';
+  loadData();
+ }catch(e){ document.getElementById('cmsg').innerText='❌ '+e.message; }
 }
 
 async function addStaff(){
- const row={name:document.getElementById('s_name').value, role:document.getElementById('s_role').value, phone:document.getElementById('s_phone').value, id_number:document.getElementById('s_id').value};
- const {error}=await S.from('staff').insert(row);
- document.getElementById('msgStaff').innerText=error?'❌ '+error.message:'✅ Saved '+row.name;
- if(!error) init();
+ const name=sname.value.trim(); if(!name){alert('Enter name');return}
+ try{ await supa.from('staff').insert({name:name, role:srole.value, phone:sphone.value, id_number:sid.value}); sname.value=''; sphone.value=''; sid.value=''; loadData(); }catch(e){ alert(e.message); }
+}
+
+function filterNurses(){
+ const f=roleFilter.value.toLowerCase();
+ staffFiltered = f==='all' ? allStaff : allStaff.filter(s=>s.role.toLowerCase().includes(f));
+ renderStaffSelect();
+}
+
+function renderStaffSelect(){
+ nurseSel.innerHTML='<option value="">Select Staff</option>'+staffFiltered.map(s=>`<option value="${s.name}|${s.phone}|${s.role}">${s.name} - ${s.role}</option>`).join('');
 }
 
 async function assignStaff(){
- const cname=document.getElementById('q_client').value.trim(); const sVal=document.getElementById('q_staff').value;
- if(!cname||!sVal) return alert('Select client and staff');
- const st=JSON.parse(sVal);
- document.getElementById('msgAssign').innerText='Assigning...';
- const pid=cname.toLowerCase().replace(/\s+/g,'_');
- const {error}=await S.from('patients').update({assigned_nurse_name:st.name, assigned_nurse_phone:st.phone, assigned_nurse_role:st.role}).eq('patient_id',pid);
- document.getElementById('msgAssign').innerText=error?'❌ '+error.message:'✅ '+st.name+' ('+st.role+') assigned to '+cname;
- if(!error) init();
+ const cname=cName.value.trim(); const val=nurseSel.value;
+ if(!cname||!val){ alert('Select client and staff'); return; }
+ assignMsg.innerText='Assigning...';
+ const [nName,nPhone,nRole]=val.split('|');
+ try{
+  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
+  if(!pt) throw new Error('Client not found');
+  let {error}=await supa.from('patients').update({assigned_nurse_name:nName, assigned_nurse_phone:nPhone, assigned_nurse_role:nRole}).eq('patient_id',pt.patient_id);
+  if(error) throw error;
+  assignMsg.innerText='✅ '+nName+' ('+nRole+') assigned to '+cname;
+  loadData();
+ }catch(e){ assignMsg.innerText='❌ '+e.message; }
 }
 
 async function addTreatment(){
- const cname=document.getElementById('q_client').value.trim(); if(!cname) return alert('Type client name first');
- const pid=cname.toLowerCase().replace(/\s+/g,'_');
- const row={patient_id:pid, drug_name:document.getElementById('d_name').value, dosage:document.getElementById('d_dose').value, frequency:document.getElementById('d_freq').value, times:document.getElementById('d_times').value};
- const {error}=await S.from('treatment_sheets').insert(row);
- document.getElementById('msgTreat').innerText=error?'❌ '+error.message:'✅ Added '+row.drug_name+' for '+cname;
- if(!error){ document.getElementById('d_name').value=''; loadSheets(); }
+ const cname=cName.value.trim(); if(!cname){ alert('Enter client name'); return; }
+ try{
+  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
+  if(!pt) throw new Error('Client not found');
+  let {error}=await supa.from('treatment_sheets').insert({patient_id:pt.patient_id, drug_name:drug.value, dosage:dose.value, frequency:freq.value, times:times.value});
+  if(error) throw error;
+  drug.value=''; dose.value=''; times.value=''; freq.value='';
+  loadSheet(); loadData();
+ }catch(e){ alert(e.message); }
 }
 
-async function loadSheets(){
- const {data}=await S.from('treatment_sheets').select('*, patients(full_name)').order('created_at',{ascending:false}).limit(20);
- const c=document.getElementById('listSheets'); c.innerHTML='';
- (data||[]).forEach(r=>{ c.innerHTML+=`<div style="padding:8px;border-bottom:1px solid #eee"><b>${r.drug_name} ${r.dosage||''}</b> <small>for ${r.patients?.full_name||r.patient_id}</small><div style="font-size:11px;color:#6b7280">${r.frequency} • ${r.times}</div></div>`; });
+async function loadSheet(){
+ const cname=cName.value.trim(); if(!cname) return;
+ try{
+  let {data:pt}=await supa.from('patients').select('patient_id').ilike('full_name','%'+cname+'%').limit(1).single();
+  if(!pt) return;
+  let {data}=await supa.from('treatment_sheets').select('*').eq('patient_id',pt.patient_id).eq('is_active',true).order('created_at');
+  sheetPreview.innerHTML=(data||[]).map(m=>`<div class=treat><b>${m.drug_name}</b> ${m.dosage||''} ${m.frequency||''}<br><small>${m.times||''}</small></div>`).join('')||'<small>No meds yet</small>';
+ }catch(e){}
 }
 
-init();
-</script>
-</body>
-</html>
+function filterClients(){
+ const q=search.value.toLowerCase(); const filtered=allClients.filter(c=>c.full_name.toLowerCase().includes(q));
+ renderClients(filtered);
+}
+
+function renderClients(list){
+ listClients.innerHTML=(list||[]).map(c=>`<div class=client><div class=avatar>${c.full_name.slice(0,2).toUpperCase()}</div><div style="flex:1"><b>${c.full_name}</b><br><small style="color:#667085">${c.diagnosis||'No diagnosis'} • ${c.address||''}<br><span class=pill>👩‍⚕️ ${c.assigned_nurse_name?c.assigned_nurse_name+' ('+ (c.assigned_nurse_role||'') +')':'Not assigned'}</span></small></div></div>`).join('')||'No clients';
+}
+
+async function loadReports(){
+ reportList.innerHTML='Loading...';
+ try{
+  let {data,error}=await supa.from('daily_sheets').select('*, patients!inner(full_name)').order('created_at',{ascending:false}).limit(30);
+  if(error) throw error;
+  if(!data||!data.length){ reportList.innerHTML='No reports yet - nurses have not submitted'; return; }
+  reportList.innerHTML=data.map(r=>`<div class=treat style="border-left-color:var(--teal)"><b>${r.patients.full_name}</b> - ${new Date(r.created_at).toLocaleString()}<br><small>BP:${r.bp_morning||'-'} HR:${r.hr_morning||'-'} Temp:${r.temp_morning||'-'} AVPU:${r.avpu||''}<br><b>Care:</b> ${r.nursing_cares||''}<br><b>Report:</b> ${r.day_report||''}<br>Pills: ${r.pills_remaining||0} (${r.days_left||0} days left) | Input:${r.input_ml||''} Output:${r.output_ml||''}</small></div>`).join('');
+ }catch(e){ reportList.innerHTML='❌ '+e.message; }
+}
+
+async function loadData(){
+ try{
+  let {data:p}=await supa.from('patients').select('*').order('created_at',{ascending:false});
+  allClients=p||[]; document.getElementById('topCount').innerText=allClients.length+' Clients'; sClients.innerText=allClients.length;
+  dlist.innerHTML=allClients.map(c=>`<option value="${c.full_name}">`).join('');
+  renderClients(allClients);
+  let {data:s}=await supa.from('staff').select('*').eq('active',true).order('created_at',{ascending:false});
+  allStaff=s||[]; sStaff.innerText=allStaff.length; staffFiltered=allStaff; renderStaffSelect();
+  listStaff.innerHTML=allStaff.map(s=>`<span class=pill style="margin:3px;display:inline-block">${s.name} - ${s.role} ${s.phone?'('+s.phone+')':''}</span>`).join(' ')||'No staff';
+  let {data:ts}=await supa.from('treatment_sheets').select('*, patients!inner(full_name)').eq('is_active',true).order('created_at',{ascending:false}).limit(50);
+  allSheets.innerHTML=(ts||[]).map(t=>`<div class=treat>${t.patients.full_name}: <b>${t.drug_name}</b> ${t.dosage||''} ${t.frequency||''}</div>`).join('')||'No sheets';
+ }catch(e){ console.log(e); }
+}
+if(prompt('Admin PIN')!=='2024'){ location.href='/'; }else{ loadData(); }
+</script></body></html>
