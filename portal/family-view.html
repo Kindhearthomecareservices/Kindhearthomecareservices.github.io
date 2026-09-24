@@ -1,51 +1,7 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KindHeart Family V3</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>:root{--teal:#0f4a5a;--green:#22c55e;--bg:#fefcf8}*{box-sizing:border-box;font-family:Inter}body{margin:0;background:var(--bg);padding:14px}
-.hero{background:linear-gradient(135deg,#0f4a5a,#1e7a8a);color:#fff;padding:22px;border-radius:20px}
-.card{background:#fff;border-radius:18px;padding:14px;margin-top:12px;box-shadow:0 4px 14px #0001;border:1px solid #e5e7eb}
-input,button{width:100%;padding:12px;border-radius:12px;border:1px solid #e5e7eb}button{background:var(--teal);color:#fff;font-weight:700;border:0;cursor:pointer}
-.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.green{background:#dcfce7;color:#166534}.amber{background:#fef3c7;color:#92400e}.red{background:#fee2e2;color:#991b1b}
-.progress{height:8px;background:#eee;border-radius:10px;overflow:hidden}.progress>div{height:8px;background:var(--green)}
-.timeline{border-left:2px solid #e5e7eb;margin-left:8px;padding-left:14px}.dot{width:10px;height:10px;background:var(--teal);border-radius:50%;margin-left:-20px;display:inline-block}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
-</head><body>
-<div class="hero"><h2>💛 KindHeart Family</h2><p>Real-time care progress for families abroad</p><input id="searchName" placeholder="Enter loved one's full name"><button onclick="loadFamily()" style="background:#fff;color:#0f4a5a;margin-top:8px">View Progress</button></div>
-<div id="result"></div>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Family - KindHeart</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>body{font-family:system-ui;background:#fff7ed;margin:0;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 8px #0001}.photo{width:100%;border-radius:12px;margin:6px 0}</style></head><body>
+<div class="card"><h3>👨‍👩‍👧 Family Portal</h3><input id="code" placeholder="Family Code or Phone"><button onclick="loginF()" style="padding:10px;background:#f59e0b;border:0;border-radius:10px;font-weight:800">View My Loved One</button></div><div id="app" style="display:none"><div class="card"><h2 id="pName"></h2><p id="pInfo"></p></div><div class="card"><h4>✅ Tasks Done</h4><div id="tasks"></div></div><div class="card"><h4>💊 Meds Given</h4><div id="meds"></div></div><div class="card"><h4>❤️ Vitals & Notes</h4><div id="notes"></div></div><div class="card"><h4>📸 True Photos from Nurse</h4><div id="photos"></div></div></div>
 <script>
-const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";
-const SB_KEY="PASTE_ANON_KEY_HERE";
-const supa=supabase.createClient(SB_URL,SB_KEY);
-async function loadFamily(){
- let name=document.getElementById('searchName').value.trim();if(!name)return alert('Enter name');
- document.getElementById('result').innerHTML='Loading premium report...';
- let {data:patients}=await supa.from('patients').select('*').ilike('full_name','%'+name+'%');if(!patients||!patients.length){document.getElementById('result').innerHTML='<div class="card">❌ No client found</div>';return}
- let patient=patients[0];let today=new Date().toISOString().split('T')[0];
- let {data:visitToday}=await supa.from('care_visits').select('*, nurses(full_name)').eq('patient_id',patient.id).eq('visit_date',today).maybeSingle();
- let {data:tasks}=await supa.from('treatment_tasks').select('*').eq('patient_id',patient.id).order('task_time');
- let {data:meds}=await supa.from('medications').select('*').eq('patient_id',patient.id).eq('is_active',true);
- let {data:records}=await supa.from('care_records').select('*, treatment_tasks(title)').eq('patient_id',patient.id).order('completed_at',{ascending:false}).limit(20);
- let {data:medAdmins}=await supa.from('medication_administrations').select('*, medications(drug_name,dose)').eq('patient_id',patient.id).order('given_at',{ascending:false}).limit(20);
- let {data:vitals}=await supa.from('vital_signs').select('*').eq('patient_id',patient.id).order('recorded_at',{ascending:false}).limit(5);
- let {data:notes}=await supa.from('nursing_notes').select('*, nurses(full_name)').eq('patient_id',patient.id).order('created_at',{ascending:false}).limit(5);
- let latestNote=notes&&notes[0];
- let todayDone=visitToday? (records.filter(r=>r.care_visit_id===visitToday.id && r.is_completed).length + medAdmins.filter(m=>m.care_visit_id===visitToday.id && m.is_given).length):0;
- let todayTotal=(tasks?tasks.length:0)+(meds?meds.reduce((s,m)=>(m.times||[]).length,0):0);
- let pct=todayTotal?Math.round(todayDone/todayTotal*100):0;
- let statusColor=latestNote?.overall_condition==='Urgent'?'red':latestNote?.overall_condition==='Needs attention'?'amber':'green';
- let statusText=latestNote?.overall_condition||patient.status||'Stable';
- document.getElementById('result').innerHTML=`
- <div class="card"><h3>👤 ${patient.full_name}</h3><span class="badge ${statusColor}">Current: ${statusText} ${statusColor==='green'?'🟢':statusColor==='amber'?'🟡':'🔴'}</span><p><small>${patient.age||''} yrs • ${patient.location||''}<br>Diagnosis: ${patient.diagnosis||'-'}<br>Allergies: ${patient.allergies||'None'}</small></p><p><b>Caregiver Today:</b> ${visitToday?.nurses?.full_name||'Not assigned yet'}</p></div>
- <div class="card"><h3>Today's Progress - ${today} - ${pct}%</h3><div class="progress"><div style="width:${pct}%"></div></div><small>${todayDone}/${todayTotal} completed</small>
- <h4 style="margin-top:10px">Tasks</h4><div>${(tasks||[]).map(t=>{let rec=records.find(r=>r.task_id===t.id && r.care_visit_id===visitToday?.id);return `<div style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #f2f4f7"><div>${t.task_time.slice(0,5)} ${t.title}</div><div>${rec?.is_completed?'<span class="badge green">✅ Done</span>':'<span class="badge amber">⏳</span>'}</div></div>`}).join('')||'No tasks'}</div>
- <h4 style="margin-top:10px">💊 Medications (${meds.length} prescribed)</h4><div>${(meds||[]).map(m=>{let givenToday=medAdmins.filter(a=>a.medication_id===m.id && a.care_visit_id===visitToday?.id);return `<div style="padding:8px;border-bottom:1px solid #f2f4f7"><b>${m.drug_name} ${m.dose}</b> ${m.frequency} - ${m.duration||''}<br><small>${m.instructions||''} • Times: ${(m.times||[]).join(', ')}</small><br><small>${givenToday.map(g=>g.is_given?`✅${g.scheduled_time} ${new Date(g.given_at).toLocaleTimeString().slice(0,5)}`: `⏳${g.scheduled_time}`).join(' | ')||'Pending today'}</small></div>`}).join('')||'No meds'}</div>
- </div>
- ${latestNote?`<div class="card" style="border-left:5px solid #22c55e"><h3>Latest Update from Nurse</h3><p><i>"${latestNote.nurse_note||'No note yet'}"</i></p><small>By ${latestNote.nurses?.full_name||'Nurse'} on ${new Date(latestNote.created_at).toLocaleString()} - Condition: ${latestNote.overall_condition}</small></div>`:''}
- ${vitals&&vitals.length?`<div class="card"><h3>📈 Latest Vitals</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">${vitals.map(v=>`<div style="background:#f9fafb;padding:8px;border-radius:8px"><small>${new Date(v.recorded_at).toLocaleDateString()}</small><br><b>BP:</b> ${v.bp_systolic||'-'}/${v.bp_diastolic||'-'}<br><b>Pulse:</b> ${v.pulse||'-'} <b>Temp:</b> ${v.temperature||'-'}<br><b>SpO2:</b> ${v.spo2||'-'}% <b>Pain:</b> ${v.pain_score||0}/10</div>`).join('')}</div></div>`:''}
- <div class="card"><h3>📅 Care Timeline</h3><div class="timeline">${(records||[]).slice(0,8).map(r=>`<div style="margin-bottom:10px"><span class="dot"></span><small>${r.completed_at?new Date(r.completed_at).toLocaleString():''}</small><br>${r.treatment_tasks?.title||'Care'} completed</div>`).join('')}${(medAdmins||[]).slice(0,8).map(m=>`<div style="margin-bottom:10px"><span class="dot" style="background:#22c55e"></span><small>${m.given_at?new Date(m.given_at).toLocaleString():''}</small><br>💊 ${m.medications?.drug_name} ${m.medications?.dose} given at ${m.scheduled_time}</div>`).join('')}${(notes||[]).map(n=>`<div style="margin-bottom:10px"><span class="dot" style="background:#f59e0b"></span><small>${new Date(n.created_at).toLocaleString()} by ${n.nurses?.full_name||''}</small><br><b>${n.overall_condition||''}</b>: ${n.nurse_note||''}</div>`).join('')||'No timeline yet'}</div></div>
- <div class="card" style="background:#0f4a5a;color:#fff"><h3 style="color:#fff">KindHeart Homecare 💛</h3><p>We care with heart<br>📞 +254 700 000 000</p></div>
- `;
-}
-let qp=new URLSearchParams(window.location.search);if(qp.get('name')){document.getElementById('searchName').value=qp.get('name');loadFamily();}
+const SUPA_URL="https://xdyoqxhqbeuiuvpsqlbb.supabase.co"; const SUPA_KEY="YOUR_ANON_KEY_HERE"; const supa=supabase.createClient(SUPA_URL,SUPA_KEY); let curPat=null;
+async function loginF(){let code=document.getElementById('code').value.trim(); let {data}=await supa.from('patients').select('*').or(`family_code.eq.${code},phone.eq.${code},family_phone.eq.${code}`).limit(1).single(); if(!data){alert('Not found');return;} curPat=data; document.getElementById('app').style.display='block'; document.getElementById('pName').innerText=data.full_name; document.getElementById('pInfo').innerText=(data.location||'')+' - '+(data.diagnosis||''); loadAll();}
+async function loadAll(){let {data:recs}=await supa.from('care_records').select('*, nurses(full_name)').eq('patient_id',curPat.id).order('created_at',{ascending:false}).limit(100); document.getElementById('tasks').innerHTML=recs.filter(r=>r.record_type==='task').map(r=>`<div>✅ ${r.details.task} by ${r.nurses?.full_name} ${new Date(r.created_at).toLocaleTimeString()}</div>`).join('')||'No tasks yet'; document.getElementById('meds').innerHTML=recs.filter(r=>r.record_type==='medication').map(r=>`<div>💊 ${r.details.med} ${new Date(r.created_at).toLocaleTimeString()}</div>`).join('')||'No meds'; document.getElementById('notes').innerHTML=recs.filter(r=>r.record_type==='note'||r.record_type==='vitals').map(r=>`<div class="card"><small>${new Date(r.created_at).toLocaleString()} by ${r.nurses?.full_name}</small><br>BP:${r.details?.vitals?.bp||''} Temp:${r.details?.vitals?.temp||''}<br>${r.details?.note||''}</div>`).join('')||'No notes'; document.getElementById('photos').innerHTML=recs.filter(r=>r.photo_url).map(r=>`<div class="card"><img class="photo" src="${r.photo_url}"><small>📸 by ${r.nurses?.full_name} ${new Date(r.created_at).toLocaleString()}<br>${r.details?.note||''}</small></div>`).join('')||'No photos yet';}
 </script></body></html>
