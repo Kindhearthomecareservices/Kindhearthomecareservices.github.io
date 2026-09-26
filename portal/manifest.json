@@ -1,9 +1,12 @@
 {
-  "name": "KindHeart Home Care",
-  "short_name": "KindHeart",
-  "start_url": "/portal/family-view.html",
-  "display": "standalone",
-  "background_color": "#f8faf6",
-  "theme_color": "#14495f",
-  "icons": [{"src": "../logo.png","sizes": "192x192","type": "image/png"}]
+  "name": "kindheart-homecare",
+  "private": true,
+  "scripts": {"dev":"next dev","build":"next build","start":"next start"},
+  "dependencies": {
+    "@supabase/ssr":"^0.5.0",
+    "@supabase/supabase-js":"^2.45.0",
+    "next":"14.2.5",
+    "react":"^18",
+    "react-dom":"^18"
+  }
 }
