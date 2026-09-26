@@ -1,8 +1,109 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart Homecare Services</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><style>body{margin:0;font-family:Inter;background:#c8d5c1;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}.box{background:#fff;border-radius:32px;padding:28px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}.btn{display:block;padding:14px;border-radius:100px;font-weight:800;text-decoration:none;margin:10px 0}.g1{background:#0A7A42;color:#fff}.g2{background:#14495f;color:#fff}.o{background:#FF6A00;color:#fff;border:2px solid #FF6A00}.b2{background:#fff;color:#14495f;border:2px solid #14495f}</style></head><body>
-<div class="box"><img src="logo.png" style="width:90px"><h1 style="margin:6px 0;font-size:32px"><span style="color:#14495f">Kind</span><span style="color:#0A7A42">Heart</span></h1><div style="letter-spacing:3px;font-size:11px;font-weight:800;color:#8aa58a">HOMECARE SERVICES</div><p style="color:#0A7A42;font-weight:700;margin:10px 0">💚 Right care at home. 💚</p>
-<a href="admin-view.html" class="btn g1">🔐 Admin Portal</a>
-<a href="nurse-entry.html" class="btn g2">👩‍⚕️ Staff portal</a>
-<a href="family-view.html" class="btn o">👨‍👩‍👧 Family Portal</a>
-<a href="https://www.kindhearthomecareservices.co.ke" target="_blank" class="btn b2">🌐 Main Website</a>
-<p style="font-size:11px;color:#8aa58a;margin-top:12px">Secure • Premium • Eldoret & Beyond<br>WhatsApp: 0707546365</p></div>
-</body></html>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - KindHeart Homecare</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>const SUPABASE_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";const SUPABASE_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);</script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter;background:#f6f9f7;color:#123}
+.topbar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e8efe9;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.sidebar{position:fixed;left:-280px;top:0;bottom:0;width:260px;background:#14495f;color:#fff;padding:18px;z-index:60;transition:.25s;overflow:auto}
+.sidebar.open{left:0}.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55}.overlay.show{display:block}
+.main{padding:12px;max-width:1300px;margin:auto}
+@media(min-width:900px){.sidebar{left:0}.main{margin-left:270px}.menu-btn{display:none!important}.overlay{display:none!important}}
+.card{background:#fff;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 8px 24px rgba(0,0,0,.05);border:1px solid #eef4eb}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px} @media(min-width:700px){.grid4{grid-template-columns:repeat(4,1fr)}}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px} @media(min-width:900px){.grid2{grid-template-columns:1fr 1fr}}
+.i{padding:12px;border:2px solid #ddeadd;border-radius:12px;width:100%;margin:5px 0;font-size:15px}
+.btn{padding:12px 16px;border-radius:100px;border:0;font-weight:800;cursor:pointer}
+.small{font-size:12px;color:#6a7a6e;font-weight:600;letter-spacing:.5px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:800}.ok{background:#e8f5e3;color:#0A7A42}.bad{background:#ffe8e8;color:#a00}.warn{background:#fff8db;color:#8a5a00}.live{background:#e0f2ff;color:#0a4a8a}
+.patient-item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #f0f4f0;flex-wrap:wrap}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}.modal.show{display:flex}.modal-box{background:#fff;border-radius:20px;padding:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+</style></head><body>
+<div class="topbar"><div class="row"><button class="btn menu-btn" style="background:#14495f;color:#fff" onclick="toggleMenu()">☰</button><div><b>KindHeart Admin</b><br><span class="small">Right care at home • kindhearthomecareservices.co.ke</span></div></div><div class="row"><span id="date" class="small"></span><button class="btn" style="background:#f0f4f0" onclick="loadAll()">↻ Refresh</button></div></div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="sidebar" id="sidebar"><img src="logo.png" style="width:54px;border-radius:12px"><h3 style="margin:8px 0 0">KindHeart Admin</h3><p class="small" style="color:#a8c4b8">Premium Portal V2</p><div style="margin-top:24px;display:grid;gap:12px"><div>📊 Dashboard</div><div>👥 Patients <span id="side_p">0</span></div><div>👩‍⚕️ Staff <span id="side_s">0</span></div><div>🚨 Alerts <span id="side_a">0</span></div></div><div style="margin-top:30px"><button class="btn" style="width:100%;background:#0A7A42;color:#fff" onclick="document.getElementById('addPatCard').scrollIntoView({behavior:'smooth'})">+ New Patient</button></div></div>
+
+<div class="main">
+<div class="grid4"><div class="card"><small class="small">ACTIVE PATIENTS</small><h1 id="c1" style="margin:6px 0">0</h1><span id="c1_sub" class="small"></span></div><div class="card"><small class="small">ACTIVE STAFF</small><h1 id="c2" style="margin:6px 0">0</h1></div><div class="card"><small class="small">VISITS TODAY</small><h1 id="c3" style="margin:6px 0">0</h1></div><div class="card" style="border-left:5px solid #FF6A00"><small class="small">ALERTS</small><h1 id="c4" style="margin:6px 0">0</h1><small style="color:#FF6A00">Requires attention</small></div></div>
+
+<div class="grid2">
+<div class="card" id="addPatCard"><h3>Add Patient</h3><input id="pname" class="i" placeholder="Full Name *"><input id="pphone" class="i" placeholder="Phone 07..."><input id="ploc" class="i" placeholder="Location Eldoret"><input id="pall" class="i" placeholder="Allergies"><input id="pdiag" class="i" placeholder="Diagnosis"><button class="btn" style="background:#0A7A42;color:#fff;width:100%;margin-top:8px" onclick="addPat()">Save Patient → Supabase</button><div id="pmsg" style="margin-top:8px;font-weight:700"></div></div>
+<div class="card"><h3>Add Staff</h3><input id="sname" class="i" placeholder="Full Name *"><input id="semail" class="i" placeholder="Email *"><input id="spin" class="i" placeholder="PIN 1234 *"><select id="srole" class="i"><option>Nurse</option><option>Caregiver</option><option>Physiotherapist</option></select><button class="btn" style="background:#14495f;color:#fff;width:100%;margin-top:8px" onclick="addStaff()">Save Staff → Supabase</button><div id="smsg" style="margin-top:8px;font-weight:700"></div></div>
+</div>
+
+<div class="card"><h3>Assign Staff → Patient + Type</h3><div class="row"><select id="ap" class="i" style="flex:2;min-width:180px"></select><select id="as" class="i" style="flex:2;min-width:180px"></select><select id="atype" class="i" style="flex:1;min-width:140px"><option value="Daily visits">Daily visits</option><option value="Live-in">Live-in</option></select><button class="btn" style="background:#FF6A00;color:#fff" onclick="assign()">Assign</button></div><small class="small">Live-in = stays with client. Daily = visits per schedule.</small></div>
+
+<div class="card"><div class="row" style="justify-content:space-between"><h3>Patients List</h3><select id="filterStatus" class="i" style="width:auto" onchange="render()"><option value="Active">Active only</option><option value="All">All</option><option value="Archived">Archived / Discharged</option></select></div><div id="plist">Loading...</div></div>
+
+<div class="grid2"><div class="card"><h3>Recent Activity / Timeline</h3><div id="timeline">Loading...</div></div><div class="card"><h3>Assignments</h3><div id="alist">Loading...</div></div></div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal"><div class="modal-box"><h3>Edit Patient</h3><input type="hidden" id="edit_id"><input id="edit_name" class="i" placeholder="Full Name"><input id="edit_phone" class="i" placeholder="Phone"><input id="edit_loc" class="i" placeholder="Location"><input id="edit_all" class="i" placeholder="Allergies"><input id="edit_diag" class="i" placeholder="Diagnosis"><select id="edit_status" class="i"><option>Active</option><option>Archived</option><option>Discharged</option></select><div class="row" style="margin-top:8px"><button class="btn" style="background:#0A7A42;color:#fff;flex:1" onclick="saveEdit()">Save Changes</button><button class="btn" style="background:#eee;flex:1" onclick="closeEdit()">Cancel</button></div></div></div>
+
+<!-- TASKS & TREATMENT MODAL -->
+<div class="modal" id="taskModal"><div class="modal-box"><h3 id="task_title">Patient Tasks & Treatment</h3><div id="task_patient_info" class="small"></div><hr>
+<h4>📝 Tasks / Daily Duties</h4><div class="row"><input id="task_input" class="i" style="flex:2" placeholder="e.g. Morning bath, wound dressing"><input id="task_time" class="i" style="flex:1" placeholder="8:00 AM"><button class="btn" style="background:#14495f;color:#fff" onclick="addTask()">Add</button></div><div id="task_list" style="margin-top:10px"></div>
+<hr style="margin:16px 0"><h4>💊 Treatment Sheet / Medications</h4><div class="row"><input id="med_name" class="i" placeholder="Med name" style="flex:1"><input id="med_dose" class="i" placeholder="Dose" style="flex:1"><input id="med_freq" class="i" placeholder="Frequency e.g. BD" style="flex:1"></div><div class="row"><input id="med_route" class="i" placeholder="Route Oral/IV" style="flex:1"><input id="med_instr" class="i" placeholder="Instructions" style="flex:2"><button class="btn" style="background:#0A7A42;color:#fff" onclick="addTreatment()">Add Med</button></div><div id="treat_list" style="margin-top:10px"></div>
+<div style="margin-top:16px"><button class="btn" style="background:#eee;width:100%" onclick="closeTask()">Close</button></div></div></div>
+
+<script>
+document.getElementById('date').innerText=new Date().toDateString();
+function toggleMenu(){sidebar.classList.toggle('open');overlay.classList.toggle('show')}
+let patients=[],staff=[],assigns=[],reports=[],currentTaskPatient=null;
+
+async function loadAll(){
+ let {data:p}=await supabaseClient.from('patients').select('*').order('created_at',{ascending:false});
+ let {data:s}=await supabaseClient.from('staff').select('*').order('created_at',{ascending:false});
+ let {data:a}=await supabaseClient.from('assignments').select('*').order('created_at',{ascending:false});
+ let {data:r}=await supabaseClient.from('care_records').select('*').order('time',{ascending:false}).limit(40);
+ patients=p||[];staff=s||[];assigns=a||[];reports=r||[]; render();
+}
+async function addPat(){
+ if(!pname.value) return alert('Name required');
+ let code='KHA'+Math.floor(1000+Math.random()*9000);
+ let {error}=await supabaseClient.from('patients').insert({full_name:pname.value,phone:pphone.value,location:ploc.value,allergies:pall.value,diagnosis:pdiag.value,family_code:code,care_status:'Active'});
+ if(error){pmsg.innerText='❌ '+error.message;return} pmsg.innerHTML=`✅ Saved! PIN: <b style="background:#0A7A42;color:#fff;padding:2px 8px;border-radius:8px">${code}</b>`; pname.value='';pphone.value='';ploc.value='';pall.value='';pdiag.value=''; loadAll();
+}
+async function addStaff(){
+ if(!semail.value||!spin.value||!sname.value) return alert('Fill all');
+ let {error}=await supabaseClient.from('staff').insert({full_name:sname.value,email:semail.value.toLowerCase().trim(),pin:spin.value,role:srole.value});
+ if(error){smsg.innerText='❌ '+error.message;return} smsg.innerText='✅ Staff saved'; sname.value='';semail.value='';spin.value=''; loadAll();
+}
+async function assign(){
+ if(!ap.value||!as.value) return alert('Select patient & staff');
+ let {error}=await supabaseClient.from('assignments').insert({patient_id:ap.value,staff_id:as.value,assignment_type:atype.value});
+ if(error) return alert(error.message); alert(`✅ Assigned as ${atype.value}`); loadAll();
+}
+function render(){
+ c1.innerText=patients.filter(p=>p.care_status==='Active').length; c2.innerText=staff.length; c3.innerText=reports.filter(r=>new Date(r.time).toDateString()===new Date().toDateString()).length; c4.innerText=reports.filter(r=>r.flag_alert).length;
+ side_p.innerText=c1.innerText; side_s.innerText=c2.innerText; side_a.innerText=c4.innerText;
+ ap.innerHTML=patients.filter(p=>p.care_status==='Active').map(p=>`<option value="${p.id}">${p.full_name} - ${p.family_code}</option>`).join('');
+ as.innerHTML=staff.map(s=>`<option value="${s.id}">${s.full_name} - ${s.role}</option>`).join('');
+ let filt=document.getElementById('filterStatus').value; let list=patients; if(filt==='Active') list=patients.filter(p=>p.care_status==='Active'); if(filt==='Archived') list=patients.filter(p=>p.care_status!=='Active');
+ plist.innerHTML=list.map(p=>{
+   let asg=assigns.find(a=>a.patient_id===p.id); let staffName=asg?staff.find(s=>s.id===asg.staff_id)?.full_name+' ('+asg.assignment_type+')':'Not assigned';
+   return `<div class="patient-item"><div><b>${p.full_name}</b> <code style="background:#0A7A42;color:#fff;padding:2px 6px;border-radius:6px">${p.family_code}</code> <span class="badge ${p.care_status==='Active'?'ok':'bad'}">${p.care_status}</span><br><span class="small">${p.location||''} • ${p.diagnosis||''} • ${staffName}</span></div><div class="row"><button class="btn" style="background:#e8f5e3;padding:8px 12px" onclick="openTask('${p.id}')">Tasks & Treatment</button><button class="btn" style="background:#eef4eb;padding:8px 12px" onclick="openEdit('${p.id}')">Edit</button><button class="btn" style="background:#fff8db;padding:8px 12px" onclick="archivePat('${p.id}')">End Care</button><button class="btn" style="background:#ffe8e8;color:#a00;padding:8px 12px" onclick="deletePat('${p.id}')">Delete</button></div></div>`
+ }).join('')||'No patients';
+ alist.innerHTML=assigns.slice(0,20).map(a=>{
+   let p=patients.find(x=>x.id===a.patient_id); let s=staff.find(x=>x.id===a.staff_id);
+   return `<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><b>${p?.full_name||'?'}</b> → ${s?.full_name||'?'} <span class="badge ${a.assignment_type==='Live-in'?'live':'ok'}">${a.assignment_type||'Daily'}</span> <small class="small">${new Date(a.created_at).toLocaleDateString()}</small></div>`
+ }).join('')||'No assignments';
+ timeline.innerHTML=reports.map(r=>`<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><b>${patients.find(p=>p.id===r.patient_id)?.full_name||'Patient'}</b> - ${r.note||r.type||''} ${r.status?`<span class="badge ${r.flag_alert?'bad':'ok'}">${r.status}</span>`:''} <small class="small">${new Date(r.time).toLocaleString()}</small></div>`).join('')||'No activity yet';
+}
+function openEdit(id){let p=patients.find(x=>x.id===id); if(!p) return; edit_id.value=p.id; edit_name.value=p.full_name; edit_phone.value=p.phone||''; edit_loc.value=p.location||''; edit_all.value=p.allergies||''; edit_diag.value=p.diagnosis||''; edit_status.value=p.care_status||'Active'; document.getElementById('editModal').classList.add('show')}
+function closeEdit(){document.getElementById('editModal').classList.remove('show')}
+async function saveEdit(){let id=edit_id.value; let {error}=await supabaseClient.from('patients').update({full_name:edit_name.value,phone:edit_phone.value,location:edit_loc.value,allergies:edit_all.value,diagnosis:edit_diag.value,care_status:edit_status.value}).eq('id',id); if(error) return alert(error.message); closeEdit(); loadAll();}
+async function archivePat(id){if(!confirm('End care for this client? They will move to Archived.')) return; let {error}=await supabaseClient.from('patients').update({care_status:'Archived',archived_at:new Date().toISOString()}).eq('id',id); if(error) return alert(error.message); loadAll();}
+async function deletePat(id){if(!confirm('DELETE PERMANENTLY? This cannot be undone.')) return; let {error}=await supabaseClient.from('patients').delete().eq('id',id); if(error) return alert(error.message); loadAll();}
+async function openTask(pid){currentTaskPatient=pid; let p=patients.find(x=>x.id===pid); task_patient_info.innerText=`${p.full_name} - ${p.family_code} - ${p.diagnosis||''}`; document.getElementById('taskModal').classList.add('show'); loadTasks();}
+function closeTask(){document.getElementById('taskModal').classList.remove('show');}
+async function loadTasks(){if(!currentTaskPatient) return; let {data:t}=await supabaseClient.from('tasks').select('*, staff:assigned_staff_id(full_name)').eq('patient_id',currentTaskPatient).order('created_at'); let {data:m}=await supabaseClient.from('treatments').select('*').eq('patient_id',currentTaskPatient).order('created_at'); task_list.innerHTML=(t||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>${x.title} <small class="small">${x.due_time||''} • ${x.status}</small></span><button class="btn" style="padding:4px 8px;background:#ffe8e8;color:#a00" onclick="delTask('${x.id}')">x</button></div>`).join('')||'<small class="small">No tasks yet</small>'; treat_list.innerHTML=(m||[]).map(x=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span><b>${x.medication}</b> ${x.dosage||''} ${x.frequency||''} ${x.route||''} <small class="small">${x.instructions||''}</small></span><button class="btn" style="padding:4px 8px;background:#ffe8e8;color:#a00" onclick="delTreat('${x.id}')">x</button></div>`).join('')||'<small class="small">No meds yet</small>';}
+async function addTask(){if(!task_input.value) return; await supabaseClient.from('tasks').insert({patient_id:currentTaskPatient,title:task_input.value,due_time:task_time.value}); task_input.value='';task_time.value=''; loadTasks();}
+async function delTask(id){await supabaseClient.from('tasks').delete().eq('id',id); loadTasks();}
+async function addTreatment(){if(!med_name.value) return; await supabaseClient.from('treatments').insert({patient_id:currentTaskPatient,medication:med_name.value,dosage:med_dose.value,frequency:med_freq.value,route:med_route.value,instructions:med_instr.value}); med_name.value='';med_dose.value='';med_freq.value='';med_route.value='';med_instr.value=''; loadTasks();}
+async function delTreat(id){await supabaseClient.from('treatments').delete().eq('id',id); loadTasks();}
+loadAll();
+</script></body></html>
