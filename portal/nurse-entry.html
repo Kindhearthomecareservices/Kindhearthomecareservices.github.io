@@ -1,21 +1,70 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Staff Portal - KindHeart</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><style>body{margin:0;font-family:Inter;background:#eef7ec;padding:12px}.card{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 4px 12px rgba(0,0,0,.05)}.i{width:100%;padding:12px;border:2px solid #ddeadd;border-radius:12px;margin:6px 0;box-sizing:border-box}.btn{padding:12px 16px;border-radius:100px;border:0;font-weight:800;cursor:pointer}.bad{background:#ffe8e8;border:2px solid #c00}</style></head><body>
-<div id="login" style="max-width:380px;margin:40px auto;background:#fff;padding:24px;border-radius:22px;text-align:center"><img src="logo.png" style="width:70px"><h3>Staff Login</h3><input id="email" class="i" placeholder="Staff Email"><input id="pin" type="password" class="i" placeholder="PIN"><button class="btn" style="background:#14495f;color:#fff;width:100%" onclick="login()">Login</button><p id="err" style="color:red;display:none">Invalid login</p></div>
-<div id="app" style="display:none;max-width:600px;margin:0 auto"><div style="display:flex;align-items:center;gap:10px;padding:10px"><img src="logo.png" style="width:40px"><b>KindHeart Staff</b><button onclick="logout()" style="margin-left:auto;background:#fee;color:#c00;border:0;padding:6px 12px;border-radius:20px;font-weight:700">Logout</button></div><div id="patients"></div><div id="detail"></div></div>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nurse - KindHeart</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>const SUPABASE_URL="https://enlvelqeqbmhamyqtzxj.supabase.co";const SUPABASE_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);</script>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Inter;background:#f6f9f7;padding:12px}.card{background:#fff;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 8px 24px rgba(0,0,0,.05);border:1px solid #eef4eb}.i{padding:12px;border:2px solid #ddeadd;border-radius:12px;width:100%;margin:5px 0}.btn{padding:12px 16px;border-radius:100px;border:0;font-weight:800;cursor:pointer;width:100%}.badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:800}.ok{background:#e8f5e3;color:#0A7A42}.bad{background:#ffe8e8;color:#a00}.warn{background:#fff8db;color:#8a5a00}.live{background:#e0f2ff;color:#0a4a8a}.small{font-size:12px;color:#6b7e6f;font-weight:600}
+.vitals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style></head><body>
+<div id="loginBox" class="card" style="max-width:420px;margin:60px auto"><h2>👩‍⚕️ Nurse / Caregiver Login</h2><input id="email" class="i" placeholder="Email e.g. steve.toroitich@gmail.com"><input id="pin" class="i" type="password" placeholder="PIN 1234"><button class="btn" style="background:#14495f;color:#fff" onclick="login()">Login</button><div id="lmsg" class="small" style="margin-top:8px"></div></div>
+
+<div id="app" style="display:none;max-width:900px;margin:auto">
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><b id="staffName">Nurse</b><br><span class="small" id="staffRole"></span></div><button class="btn" style="width:auto;background:#eee" onclick="location.reload()">Logout</button></div></div>
+<div id="plist"></div>
+</div>
+
 <script>
-let patients=JSON.parse(localStorage.getItem('kh_p')||'[]'),staff=JSON.parse(localStorage.getItem('kh_s')||'[]'),assigns=JSON.parse(localStorage.getItem('kh_a')||'[]'),reports=JSON.parse(localStorage.getItem('kh_r')||'[]'),curStaff=null,curPat=null
-function login(){ let s=staff.find(x=>x.email===email.value.trim()&&x.pin===pin.value.trim()); if(!s){err.style.display='block';return} curStaff=s; sessionStorage.setItem('staff',JSON.stringify(s)); renderList() }
-function logout(){sessionStorage.clear();location.reload()}
-let ss=sessionStorage.getItem('staff'); if(ss){curStaff=JSON.parse(ss); renderList()}
-function checkBP(bp){ if(!bp.includes('/')) return {ok:true}; let s=parseInt(bp.split('/')[0]),d=parseInt(bp.split('/')[1]); if(s>=180||d>=120) return {ok:false,msg:'CRISIS BP '+bp+' - Immediate Review'}; if(s>=140||d>=90) return {ok:false,msg:'HIGH BP '+bp}; if(s>=130||d>=85) return {ok:true,warn:'Elevated '+bp}; return {ok:true} }
-function renderList(){ login.style.display='none'; app.style.display='block'; let myAssigns=assigns.filter(a=>a.staff_id===curStaff.id); let myPatients=patients.filter(p=>myAssigns.find(a=>a.patient_id===p.id)); document.getElementById('patients').innerHTML=`<div class="card"><h3>Good Morning, ${curStaff.full_name}</h3><p>${myPatients.length} Patients Assigned Today</p></div>`+myPatients.map(p=>`<div class="card"><b>${p.full_name}</b> - ${p.location||'Eldoret'}<br><small>Family PIN: ${p.family_code}</small><br><button class="btn" style="background:#0A7A42;color:#fff;margin-top:8px" onclick="openPat('${p.id}')">OPEN PATIENT →</button></div>`).join('') }
-function openPat(id){ curPat=patients.find(p=>p.id===id); let r=reports.filter(x=>x.patient_id===id); document.getElementById('detail').innerHTML=`<div class="card"><h3>${curPat.full_name} - Care</h3><p style="font-size:12px">Allergies: ${curPat.allergies||'None'} | Diagnosis: ${curPat.diagnosis||'-'}</p></div>
-<div class="card"><h4>🩺 Record Vitals (8 fields) - 200/100 will be flagged</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="bp" class="i" placeholder="BP 120/80"><input id="temp" class="i" placeholder="Temp 36.7"><input id="pulse" class="i" placeholder="Pulse 78"><input id="spo2" class="i" placeholder="SpO2 98"><input id="resp" class="i" placeholder="Resp 18"><input id="weight" class="i" placeholder="Weight kg"><input id="sugar" class="i" placeholder="Blood Sugar"><input id="pain" class="i" placeholder="Pain 0-10"></div><button class="btn" style="background:#0A7A42;color:#fff;width:100%;margin-top:8px" onclick="saveVitals()">Save Vitals → Family sees it</button><div id="vmsg" style="margin-top:8px;font-weight:700"></div></div>
-<div class="card"><h4>✅ Tasks</h4>${['Morning care','Bathing','Feeding','Physio','Evening meds'].map(t=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>${t}</span><button class="btn" style="background:#eef7ec;padding:6px 12px;font-size:12px" onclick="saveTask('${t}')">Done</button></div>`).join('')}<div style="margin-top:10px"><b>Custom Task:</b> <input id="customTask" class="i" placeholder="Wound dressing"><button class="btn" style="background:#14495f;color:#fff" onclick="saveTask(document.getElementById('customTask').value)">Save Custom Task</button></div></div>
-<div class="card"><h4>💊 Medications</h4><input id="medName" class="i" placeholder="Med name e.g. Amlodipine 5mg"><button class="btn" style="background:#FF6A00;color:#fff" onclick="saveMed()">Mark Given</button></div>
-<div class="card"><h4>📝 Care Note</h4><textarea id="note" class="i" style="height:80px" placeholder="Patient was comfortable..."></textarea><button class="btn" style="background:#14495f;color:#fff;width:100%" onclick="saveNote()">Save Note</button></div>
-<div class="card"><h4>Timeline Today</h4>${r.slice(-5).reverse().map(x=>`<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px">${new Date(x.time).toLocaleTimeString()} - ${x.note||x.type} ${x.vitals?JSON.stringify(x.vitals):''}</div>`).join('')||'No records yet'}</div>` }
-function saveVitals(){ let bpVal=document.getElementById('bp').value.trim(); let tempVal=document.getElementById('temp').value; let pulseVal=document.getElementById('pulse').value; let spo2Val=document.getElementById('spo2').value; let check=checkBP(bpVal); let flagReason=''; if(!check.ok) flagReason=check.msg; if(parseFloat(tempVal)>=38) flagReason+=(flagReason?'; ':'')+'Fever '+tempVal+'°C'; if(parseInt(spo2Val)<94&&spo2Val) flagReason+=(flagReason?'; ':'')+'Low SpO2 '+spo2Val+'%'; let vit={bp:bpVal,temp:tempVal,pulse:pulseVal,spo2:spo2Val,resp:document.getElementById('resp').value,weight:document.getElementById('weight').value,sugar:document.getElementById('sugar').value,pain:document.getElementById('pain').value, flag_reason:flagReason, flag_alert:flagReason!==''}; reports.push({id:Date.now().toString(),patient_id:curPat.id,staff_id:curStaff.id,type:'Vitals',vitals:vit,note:`Vitals BP ${bpVal} ${flagReason?'⚠️ '+flagReason:'Normal'}`,time:new Date().toISOString(),status:flagReason?'HIGH ALERT':'Normal'}); localStorage.setItem('kh_r',JSON.stringify(reports)); document.getElementById('vmsg').innerHTML=flagReason?`<span style="color:#c00">🚨 ALERT SAVED: ${flagReason} - Family will see RED</span>`:`<span style="color:#0A7A42">✅ Vitals saved as Normal - ${bpVal}</span>`; }
-function saveTask(t){ if(!t) return; reports.push({id:Date.now().toString(),patient_id:curPat.id,staff_id:curStaff.id,type:'Task',note:'✅ '+t,time:new Date().toISOString(),status:'Completed'}); localStorage.setItem('kh_r',JSON.stringify(reports)); alert('Task saved'); openPat(curPat.id) }
-function saveMed(){ let n=document.getElementById('medName').value; if(!n) return; reports.push({id:Date.now().toString(),patient_id:curPat.id,staff_id:curStaff.id,type:'Med',note:'💊 '+n,status:'Given',time:new Date().toISOString()}); localStorage.setItem('kh_r',JSON.stringify(reports)); alert('Medication marked as Given'); openPat(curPat.id) }
-function saveNote(){ let n=document.getElementById('note').value; if(!n) return; reports.push({id:Date.now().toString(),patient_id:curPat.id,staff_id:curStaff.id,type:'Note',note:'📝 '+n,time:new Date().toISOString()}); localStorage.setItem('kh_r',JSON.stringify(reports)); alert('Note saved'); openPat(curPat.id) }
+let staff=null;
+async function login(){
+ let {data,error}=await supabaseClient.from('staff').select('*').eq('email',email.value.toLowerCase().trim()).eq('pin',pin.value).single();
+ if(error||!data){lmsg.innerText='❌ Wrong email or PIN';return} staff=data; loginBox.style.display='none'; app.style.display='block'; staffName.innerText=data.full_name; staffRole.innerText=data.role; loadPatients();
+}
+async function loadPatients(){
+ let {data:assigns}=await supabaseClient.from('assignments').select('*, patient:patient_id(*)').eq('staff_id',staff.id);
+ if(!assigns||assigns.length==0){plist.innerHTML='<div class="card">No patients assigned yet. Ask Admin.</div>';return}
+ plist.innerHTML=assigns.filter(a=>a.patient.care_status==='Active').map(a=>{
+   let p=a.patient;
+   return `<div class="card"><div style="display:flex;justify-content:space-between"><div><b style="font-size:18px">${p.full_name}</b> <span class="badge ${a.assignment_type==='Live-in'?'live':'ok'}">${a.assignment_type||'Daily'}</span> <span class="badge ok">${p.family_code}</span><br><span class="small">${p.location||''} • ${p.diagnosis||''} • Allergies: ${p.allergies||'None'}</span></div><button class="btn" style="width:auto;background:#0A7A42;color:#fff;padding:8px 14px" onclick="openCare('${p.id}')">Open Care Sheet</button></div><div id="care_${p.id}" style="display:none;margin-top:14px"></div></div>`
+ }).join('');
+}
+async function openCare(pid){
+ let el=document.getElementById('care_'+pid); if(el.style.display==='block'){el.style.display='none';return} el.style.display='block'; el.innerHTML='Loading tasks...';
+ let {data:tasks}=await supabaseClient.from('tasks').select('*').eq('patient_id',pid).order('created_at');
+ let {data:treats}=await supabaseClient.from('treatments').select('*').eq('patient_id',pid);
+ let {data:recents}=await supabaseClient.from('care_records').select('*').eq('patient_id',pid).order('time',{ascending:false}).limit(5);
+ el.innerHTML=`
+ <hr><h4>📋 Today's Tasks (Check when done)</h4>
+ <div>${(tasks||[]).map(t=>`<label style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0"><input type="checkbox" ${t.status==='Done'?'checked':''} onchange="toggleTask('${t.id}',this.checked)"> <span>${t.title} <small class="small">${t.due_time||''}</small> ${t.status==='Done'?'✅':''}</span></label>`).join('')||'<small class="small">No tasks from Admin yet</small>'}</div>
+ <h4 style="margin-top:14px">💊 Treatment Sheet</h4>
+ <div>${(treats||[]).map(m=>`<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><b>${m.medication}</b> ${m.dosage||''} ${m.frequency||''} (${m.route||''}) <small class="small">${m.instructions||''}</small></div>`).join('')||'<small class="small">No meds</small>'}</div>
+ <h4 style="margin-top:14px">🩺 Record Vitals & Care (FIXED BP LOGIC)</h4>
+ <div class="vitals-grid"><input id="bp_${pid}" class="i" placeholder="BP e.g. 120/80"><input id="temp_${pid}" class="i" placeholder="Temp °C e.g. 36.8"><input id="spo2_${pid}" class="i" placeholder="SpO2 % e.g. 96"><input id="hr_${pid}" class="i" placeholder="HR e.g. 78"></div>
+ <input id="note_${pid}" class="i" placeholder="Care note e.g. Patient stable, wound dressed">
+ <div id="flag_${pid}" style="margin:6px 0;font-weight:800"></div>
+ <button class="btn" style="background:#FF6A00;color:#fff;margin-top:6px" onclick="saveVitals('${pid}')">Save Visit → Family & Admin see instantly</button>
+ <div style="margin-top:10px"><small class="small">Recent visits</small><div>${(recents||[]).map(r=>`<div style="font-size:12px;padding:4px 0;border-bottom:1px solid #f5f5f5">${r.status||''} ${r.note||''} • ${new Date(r.time).toLocaleString()} ${r.flag_alert?'🚨':''}</div>`).join('')}</div></div>
+ `;
+ // live vitals checker
+ ['bp','temp','spo2'].forEach(k=>{
+   let inp=document.getElementById(k+'_'+pid); if(!inp) return;
+   inp.addEventListener('input',()=>checkLive(pid));
+ });
+}
+function checkBP(v){ if(!v||!v.includes('/')) return {level:'ok',text:''}; let s=parseInt(v.split('/')[0]), d=parseInt(v.split('/')[1]); if(isNaN(s)||isNaN(d)) return {level:'ok',text:''}; if(s>=180||d>=120) return {level:'bad',text:`🚨 CRISIS ${v} - Urgent!`}; if(s>=140||d>=90) return {level:'bad',text:`🔴 HIGH ${v}`}; if(s>=130||d>=85) return {level:'warn',text:`🟡 Elevated ${v}`}; return {level:'ok',text:`🟢 Normal ${v}`}; }
+function checkTemp(v){ let n=parseFloat(v); if(isNaN(n)) return {level:'ok',text:''}; if(n>=38) return {level:'bad',text:`🔴 Fever ${n}°C`}; if(n>=37.5) return {level:'warn',text:`🟡 High ${n}°C`}; return {level:'ok',text:`🟢 Normal ${n}°C`} }
+function checkSpO2(v){ let n=parseInt(v); if(isNaN(n)) return {level:'ok',text:''}; if(n<90) return {level:'bad',text:`🚨 LOW SpO2 ${n}%`}; if(n<94) return {level:'warn',text:`🟡 Low ${n}%`}; return {level:'ok',text:`🟢 Normal ${n}%`} }
+function checkLive(pid){
+ let bp=document.getElementById('bp_'+pid).value, t=document.getElementById('temp_'+pid).value, s=document.getElementById('spo2_'+pid).value;
+ let r1=checkBP(bp), r2=checkTemp(t), r3=checkSpO2(s); let flag=document.getElementById('flag_'+pid);
+ let worst=[r1,r2,r3].find(r=>r.level==='bad')||[r1,r2,r3].find(r=>r.level==='warn')||r1;
+ flag.innerHTML=`${r1.text} ${r2.text} ${r3.text}`.trim(); flag.className=worst.level==='bad'?'bad badge':worst.level==='warn'?'warn badge':'ok badge';
+}
+async function toggleTask(id,checked){ await supabaseClient.from('tasks').update({status:checked?'Done':'Pending'}).eq('id',id); }
+async function saveVitals(pid){
+ let bp=document.getElementById('bp_'+pid).value, temp=document.getElementById('temp_'+pid).value, spo2=document.getElementById('spo2_'+pid).value, hr=document.getElementById('hr_'+pid).value, note=document.getElementById('note_'+pid).value;
+ let c1=checkBP(bp), c2=checkTemp(temp), c3=checkSpO2(spo2);
+ let isAlert=c1.level==='bad'||c2.level==='bad'||c3.level==='bad'; let reason=[c1.text,c2.text,c3.text].filter(x=>x).join(' | ');
+ let status=isAlert?reason||'Alert':[c1.text,c2.text,c3.text].filter(x=>x).join(' ');
+ let {error}=await supabaseClient.from('care_records').insert({patient_id:pid, staff_id:staff.id, type:'visit', note:note, vitals:{bp, temp, spo2, hr}, status:status, flag_alert:isAlert, flag_reason:reason});
+ if(error) return alert(error.message); alert(isAlert?'🚨 Saved with ALERT - Admin notified!':'✅ Visit saved'); document.getElementById('note_'+pid).value=''; document.getElementById('bp_'+pid).value=''; loadPatients();
+}
 </script></body></html>
