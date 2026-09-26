@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KindHeart Family</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="brand-header"><div class="left"><img src="logo.png"><div><b>KindHeart Family Portal</b><br><a href="https://kindhearthomecareservices.co.ke">kindhearthomecareservices.co.ke</a> | 0707546365</div></div></div>
+<div class="card" id="patientHead"></div>
+<div class="card"><h3>Latest Vitals — Actual Numbers with Alerts</h3><div id="vitals"></div></div>
+<div class="card"><h3>Treatment Sheet — Automated Duration</h3><div id="treatment"></div></div>
+<div class="card"><h3>Care Done — Nursing Notes / Care Notes</h3><div id="care"></div></div>
+<div class="card"><h3>Consumables Used — Logged by Caregiver</h3><div id="cons"></div></div>
+<div class="card"><h3>📅 Doctor Appointments — Reminders</h3><div id="aps"></div></div>
+
+<script src="app.js"></script>
+<script>
+function render(){
+ let db=initDB(); let p=db.patients[0];
+ document.getElementById('patientHead').innerHTML=`<b>${p.full_name} - ${p.id}</b> - ${p.location} — Care Started: ${p.care_started_date} — <b>Day ${dayCount(p.care_started_date)}</b> of care`;
+ let vHtml=''; db.vitals.slice(-5).reverse().forEach(v=>{ vHtml+=`<div class="${v.is_abnormal?'red-alert':'card'}">${v.created_at.slice(0,16)} - ${v.bp}, Temp ${v.temp}°C, SpO2 ${v.spo2}% (Normal 89-100%), HR ${v.hr} — ${v.status} by ${v.staff_id}</div>`}); document.getElementById('vitals').innerHTML=vHtml||'No vitals yet';
+
+ let tHtml=''; db.treatment.forEach(t=>{ let day=dayCount(t.start_date); let low=t.remaining_qty<10; tHtml+=`<div class="${low?'red-alert':'card'}">${t.drug_name} ${t.dosage} - Day ${day} of ${t.duration_days} - Total ${t.total_qty}, ${t.remaining_qty} left ${low?'LOW!':''} - ${t.start_date} to ${t.end_date}<br><small>${t.notes}</small></div>`}); document.getElementById('treatment').innerHTML=tHtml||'No treatment';
+
+ let cHtml=''; db.care_notes.slice(-10).reverse().forEach(n=>{cHtml+=`<div class="history-item">${n.created_at.slice(0,16)} - ${n.staff_id} (${n.note_type}): ${n.content}</div>`}); document.getElementById('care').innerHTML=cHtml;
+
+ let iHtml=''; db.inventory.slice(-10).reverse().forEach(i=>{ let cls=i.stock_status.includes('OUT')?'red-alert':i.stock_status.includes('Deplete')?'yellow-alert':''; iHtml+=`<div class="history-item ${cls}">${i.created_at?.slice(0,16)} - ${i.item_name} ${i.used_today}x - ${i.stock_status} - ${i.remaining} left</div>`}); document.getElementById('cons').innerHTML=iHtml;
+
+ let aHtml=''; db.appointments.forEach(a=>{ let diff=Math.ceil((new Date(a.appointment_date)-new Date())/86400000); aHtml+=`<div class="card">📅 ${a.appointment_date} ${a.appointment_time} - ${a.hospital} - ${a.doctor_name} - ${a.purpose} - In ${diff} days - Added by ${a.staff_id}</div>`}); document.getElementById('aps').innerHTML=aHtml||'No appointments';
+}
+initDB();render(); setInterval(render,3000);
+</script></body></html>
