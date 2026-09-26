@@ -1,201 +1,22 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin - KindHeart</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<style>
-*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:#f3f7f3}
-header{background:#163f4f;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-.card{background:#fff;border-radius:14px;padding:14px;margin:10px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-.btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
-.btn-p{background:#163f4f;color:#fff}.btn-g{background:#0a7a22;color:#fff}.btn-r{background:#c0392b;color:#fff}.btn-y{background:#f2c14e}
-input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin:4px 0}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;padding:10px}
-.tab{padding:8px 12px;background:#e8efe8;border-radius:20px;cursor:pointer;font-weight:700;font-size:13px}
-.tab.active{background:#163f4f;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
-.item{border:1px solid #eee;border-radius:10px;padding:10px;margin:6px 0}
-.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:800}
-.b-ok{background:#d4edda}.b-warn{background:#fff3cd}.b-bad{background:#f8d7da}
-</style></head><body>
-<header><b>KindHeart Admin</b><button onclick="location.href='index.html'" class="btn btn-y">Hub</button></header>
-
-<div id="login" class="card" style="max-width:400px;margin:40px auto">
-<h3>Admin Login</h3>
-<input id="pass" type="password" placeholder="Password KindHeart@2024">
-<button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doLogin()">Login</button>
-<div id="loginMsg" style="color:red;font-size:13px;margin-top:6px"></div>
-</div>
-
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin KindHeart</title><script src="config.js"></script>
+<style>*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#f3f7f3}header{background:#163f4f;color:#fff;padding:14px 18px;display:flex;justify-content:space-between} .card{background:#fff;border-radius:14px;padding:14px;margin:10px} .btn{padding:8px 12px;border-radius:8px;border:none;font-weight:700;cursor:pointer} .btn-p{background:#163f4f;color:#fff}.btn-g{background:#0a7a22;color:#fff}.btn-r{background:#c0392b;color:#fff}.btn-y{background:#f2c14e;color:#000} input,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin:4px 0} .item{border:1px solid #eee;border-radius:10px;padding:10px;margin:6px 0}</style>
+</head><body>
+<header><b>KindHeart Admin</b><button class="btn btn-y" onclick="location.href='index.html'">Hub</button></header>
+<div id="login" class="card" style="max-width:400px;margin:40px auto"><h3>Admin Login</h3><input id="pass" type="password" placeholder="KindHeart@2024"><button class="btn btn-p" style="width:100%;margin-top:8px" onclick="doLogin()">Login</button></div>
 <div id="app" style="display:none">
-<div class="card grid">
-<div>Active Patients: <b id="cPat">0</b></div>
-<div>Staff: <b id="cStaff">0</b></div>
-<div>Low Stock: <b id="cLow">0</b></div>
+<div class="card"><b>Patients: <span id="cPat">0</span></b> | Staff: <span id="cStaff">0</span></div>
+<div class="card"><h3>Add Patient</h3><input id="pName" placeholder="Full Name"><input id="pLoc" placeholder="Location e.g Kapseret"><button class="btn btn-g" onclick="addPatient()">Generate KH Code & Save</button><div id="patList"></div></div>
+<div class="card"><h3>Add Staff</h3><input id="sName" placeholder="Name"><select id="sType"><option>Nurse</option><option>Caregiver</option></select><input id="sPhone" placeholder="Phone 07xx"><button class="btn btn-g" onclick="addStaff()">Generate PIN & Save</button><div id="staffList"></div></div>
 </div>
-
-<div class="tabs">
-<div class="tab active" onclick="showTab('patients')">Patients</div>
-<div class="tab" onclick="showTab('staff')">Staff</div>
-<div class="tab" onclick="showTab('meds')">Medications</div>
-<div class="tab" onclick="showTab('apps')">Appointments</div>
-<div class="tab" onclick="showTab('feed')">Live Feed</div>
-</div>
-
-<div id="tab-patients" class="card">
-<h3>Add Patient - Auto Code KH+4 numbers</h3>
-<input id="pName" placeholder="Full Name">
-<input id="pLoc" placeholder="Location e.g Kapseret">
-<button class="btn btn-g" onclick="addPatient()">Generate KH Code & Save</button>
-<div id="patList"></div>
-</div>
-
-<div id="tab-staff" class="card" style="display:none">
-<h3>Add Staff - Auto PIN 4-digit</h3>
-<input id="sName" placeholder="Full Name">
-<select id="sType"><option value="Nurse">Nurse</option><option value="Caregiver">Caregiver</option></select>
-<input id="sPhone" placeholder="Phone">
-<button class="btn btn-g" onclick="addStaff()">Generate PIN & Save</button>
-<div id="staffList"></div>
-</div>
-
-<div id="tab-meds" class="card" style="display:none">
-<h3>Treatment Sheet</h3>
-<select id="mPat"></select>
-<input id="mMed" placeholder="Medication Name">
-<select id="mFreq"><option>TDS</option><option>BD</option><option>OD</option><option>Nocte</option></select>
-<input id="mDos" placeholder="Dosage e.g 500mg">
-<input id="mStart" type="date">
-<input id="mDur" type="number" value="30" placeholder="Duration days">
-<textarea id="mNotes" placeholder="Notes"></textarea>
-<button class="btn btn-g" onclick="addMed()">Add Medication</button>
-<div id="medList"></div>
-</div>
-
-<div id="tab-apps" class="card" style="display:none">
-<h3>All Appointments (Nurse filled)</h3>
-<div id="appList"></div>
-</div>
-
-<div id="tab-feed" class="card" style="display:none">
-<h3>Live Feed - Today</h3>
-<button class="btn btn-p" onclick="loadFeed()">Refresh</button>
-<div id="feedList"></div>
-</div>
-</div>
-
 <script>
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-function doLogin(){ if(document.getElementById('pass').value==='KindHeart@2024'){document.getElementById('login').style.display='none';document.getElementById('app').style.display='block';loadAll();} else {document.getElementById('loginMsg').innerText='Wrong password';}}
-function showTab(t){ document.querySelectorAll('[id^=tab-]').forEach(e=>e.style.display='none'); document.getElementById('tab-'+t).style.display='block'; document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active')); event.target.classList.add('active'); if(t==='patients')loadPatients(); if(t==='staff')loadStaff(); if(t==='meds')loadMeds(); if(t==='apps')loadAppointments(); if(t==='feed')loadFeed(); }
-
-async function loadAll(){ loadPatients(); loadStaff(); loadMeds(); loadAppointments(); loadCounts(); }
-async function loadCounts(){
- const {data:pat}=await sb.from('patients').select('*').eq('status','Active');
- const {data:staff}=await sb.from('nurses').select('*').eq('is_active',true);
- const {data:low}=await sb.from('consumables').select('*').in('status',['About to be depleted','Depleted']);
- document.getElementById('cPat').innerText=pat?.length||0;
- document.getElementById('cStaff').innerText=staff?.length||0;
- document.getElementById('cLow').innerText=low?.length||0;
-}
-
-async function addPatient(){
- const code='KH'+Math.floor(1000+Math.random()*9000);
- const {error}=await sb.from('patients').insert({full_name:pName.value,location:pLoc.value,family_code:code,family_pin:code});
- if(error)alert(error.message); else {alert('Saved Code: '+code); pName.value='';pLoc.value=''; loadPatients(); loadCounts();}
-}
-async function loadPatients(){
- const {data}=await sb.from('patients').select('*').order('created_at',{ascending:false});
- let patSel=document.getElementById('mPat'); patSel.innerHTML='';
- let h='';
- data?.forEach(p=>{
-   patSel.innerHTML+=`<option value="${p.id}">${p.full_name} (${p.family_code})</option>`;
-   h+=`<div class="item"><b>${p.full_name}</b> - ${p.location} - <span class="badge b-ok">${p.family_code}</span> - ${p.status}
-   <br><button class="btn btn-p" onclick="editPat('${p.id}','${p.full_name}','${p.location}','${p.family_code}')">Edit</button>
-   <button class="btn btn-y" onclick="archivePat('${p.id}')">Archive</button>
-   <button class="btn btn-r" onclick="delPat('${p.id}')">Delete</button></div>`;
- });
- document.getElementById('patList').innerHTML=h;
-}
-async function editPat(id,oldName,oldLoc,oldCode){
- const n=prompt('Name',oldName); const l=prompt('Location',oldLoc); const c=prompt('Family Code KHXXXX',oldCode);
- if(n) await sb.from('patients').update({full_name:n,location:l,family_code:c,family_pin:c}).eq('id',id); loadPatients();
-}
-async function archivePat(id){ await sb.from('patients').update({status:'Archived'}).eq('id',id); loadPatients(); loadCounts();}
-async function delPat(id){ if(confirm('Delete permanently?')){ await sb.from('patients').delete().eq('id',id); loadPatients(); loadCounts();} }
-
-async function addStaff(){
- const pin=''+Math.floor(1000+Math.random()*9000);
- const {error}=await sb.from('nurses').insert({full_name:sName.value,staff_type:sType.value,phone:sPhone.value,pin:pin});
- if(error)alert(error.message); else {alert('Staff PIN: '+pin); sName.value=''; sPhone.value=''; loadStaff(); loadCounts();}
-}
-async function loadStaff(){
- const {data}=await sb.from('nurses').select('*').order('created_at',{ascending:false});
- let h='';
- data?.forEach(s=>{
- h+=`<div class="item"><b>${s.full_name}</b> (${s.staff_type}) PIN:${s.pin} Phone:${s.phone} ${s.is_active?'Active':'Archived'}
- <br><button class="btn btn-p" onclick="editStaff('${s.id}','${s.full_name}','${s.pin}','${s.phone}','${s.staff_type}')">Edit</button>
- <button class="btn btn-y" onclick="archiveStaff('${s.id}')">Archive</button>
- <button class="btn btn-r" onclick="delStaff('${s.id}')">Delete</button></div>`;
- });
- document.getElementById('staffList').innerHTML=h;
-}
-async function editStaff(id,oldN,oldPin,oldPh,oldT){
- const n=prompt('Name',oldN); const pin=prompt('PIN 4-digit',oldPin); const ph=prompt('Phone',oldPh); const t=prompt('Type Nurse/Caregiver',oldT);
- if(n) await sb.from('nurses').update({full_name:n,pin:pin,phone:ph,staff_type:t}).eq('id',id); loadStaff();
-}
-async function archiveStaff(id){ await sb.from('nurses').update({is_active:false}).eq('id',id); loadStaff(); loadCounts();}
-async function delStaff(id){ if(confirm('Delete staff?')){ await sb.from('nurses').delete().eq('id',id); loadStaff(); loadCounts();} }
-
-async function addMed(){
- const {error}=await sb.from('treatment_sheet').insert({patient_id:mPat.value,medication_name:mMed.value,frequency:mFreq.value,dosage:mDos.value,start_date:mStart.value||new Date().toISOString().slice(0,10),duration:parseInt(mDur.value),notes:mNotes.value});
- if(error)alert(error.message); else {alert('Added'); mMed.value=''; mDos.value=''; loadMeds();}
-}
-async function loadMeds(){
- const {data}=await sb.from('treatment_sheet').select('*,patients(full_name)').order('created_at',{ascending:false});
- let h='';
- data?.forEach(m=>{
- const day=Math.floor((new Date()-new Date(m.start_date))/(1000*60*60*24))+1;
- h+=`<div class="item"><b>${m.patients?.full_name}</b> - ${m.medication_name} ${m.frequency} ${m.dosage} - Day ${day} of ${m.duration}
- <br><button class="btn btn-p" onclick="editMed('${m.id}','${m.medication_name}','${m.dosage}','${m.frequency}')">Edit</button>
- <button class="btn btn-r" onclick="delMed('${m.id}')">Delete</button></div>`;
- });
- document.getElementById('medList').innerHTML=h;
-}
-async function editMed(id,oldM,oldD,oldF){
- const m=prompt('Medication',oldM); const d=prompt('Dosage',oldD); const f=prompt('Freq TDS/BD/OD/Nocte',oldF);
- if(m) await sb.from('treatment_sheet').update({medication_name:m,dosage:d,frequency:f}).eq('id',id); loadMeds();
-}
-async function delMed(id){ if(confirm('Delete med?')){ await sb.from('treatment_sheet').delete().eq('id',id); loadMeds();} }
-
-async function loadAppointments(){
- const {data}=await sb.from('appointments').select('*,patients(full_name),nurses(full_name)').order('appointment_date',{ascending:true});
- let h='';
- data?.forEach(a=>{
- h+=`<div class="item"><b>${a.patients?.full_name}</b> - ${a.appointment_type} on ${a.appointment_date} at ${a.location} - by ${a.nurses?.full_name} - ${a.status}
- <br>${a.notes||''}
- <br><button class="btn btn-p" onclick="editApp('${a.id}')">Edit</button>
- <button class="btn btn-r" onclick="delApp('${a.id}')">Delete</button></div>`;
- });
- document.getElementById('appList').innerHTML=h||'No appointments';
-}
-async function editApp(id){
- const d=prompt('New date YYYY-MM-DD'); const t=prompt('Type'); const s=prompt('Status Upcoming/Completed/Cancelled');
- if(d) await sb.from('appointments').update({appointment_date:d,appointment_type:t,status:s}).eq('id',id); loadAppointments();
-}
-async function delApp(id){ if(confirm('Delete appointment?')){ await sb.from('appointments').delete().eq('id',id); loadAppointments();} }
-
-async function loadFeed(){
- const {data:v}=await sb.from('vitals').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(20);
- const {data:c}=await sb.from('care_notes').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(20);
- const {data:co}=await sb.from('consumables').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(20);
- let h='<h4>Vitals</h4>';
- v?.forEach(x=>{h+=`<div class="item">${x.created_at.slice(0,16)} - ${x.patients?.full_name} - BP:${x.bp} Temp:${x.temp} SpO2:${x.spo2} HR:${x.hr} - ${x.status} by ${x.nurses?.full_name}</div>`});
- h+='<h4>Care Notes</h4>';
- c?.forEach(x=>{h+=`<div class="item">${x.created_at.slice(0,16)} - ${x.patients?.full_name} - ${x.note_type}: ${x.note} by ${x.nurses?.full_name}</div>`});
- h+='<h4>Consumables</h4>';
- co?.forEach(x=>{h+=`<div class="item">${x.created_at.slice(0,16)} - ${x.patients?.full_name} - ${x.item_name} ${x.qty_used} - ${x.status} ${x.days_to_deplete?' - '+x.days_to_deplete+' days':''} by ${x.nurses?.full_name}</div>`});
- document.getElementById('feedList').innerHTML=h;
-}
+const H={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+function doLogin(){if(pass.value==='KindHeart@2024'){login.style.display='none';app.style.display='block';loadAll();}else alert('Wrong');}
+async function loadAll(){try{let r=await fetch(SUPABASE_URL+"/rest/v1/patients?status=eq.Active",{headers:H});let d=await r.json();cPat.innerText=d.length||0; let r2=await fetch(SUPABASE_URL+"/rest/v1/nurses?is_active=eq.true",{headers:H});let d2=await r2.json();cStaff.innerText=d2.length||0; loadPatients(); loadStaff();}catch(e){alert(e)}}
+async function addPatient(){const code='KH'+Math.floor(1000+Math.random()*9000);let res=await fetch(SUPABASE_URL+"/rest/v1/patients",{method:"POST",headers:H,body:JSON.stringify({full_name:pName.value,location:pLoc.value,family_code:code,family_pin:code})});if(!res.ok){alert(await res.text());return;}alert('Saved Code: '+code);pName.value='';pLoc.value='';loadAll();}
+async function loadPatients(){let r=await fetch(SUPABASE_URL+"/rest/v1/patients?order=created_at.desc",{headers:H});let data=await r.json();let h='';data.forEach(p=>{h+=`<div class="item"><b>${p.full_name}</b> ${p.location} <b>${p.family_code}</b> <button class="btn btn-r" onclick="delPat('${p.id}')">Delete</button></div>`});patList.innerHTML=h;}
+async function delPat(id){if(!confirm('Delete?'))return;await fetch(SUPABASE_URL+"/rest/v1/patients?id=eq."+id,{method:"DELETE",headers:H});loadAll();}
+async function addStaff(){const pin=''+Math.floor(1000+Math.random()*9000);let res=await fetch(SUPABASE_URL+"/rest/v1/nurses",{method:"POST",headers:H,body:JSON.stringify({full_name:sName.value,staff_type:sType.value,phone:sPhone.value,pin:pin})});if(!res.ok){alert(await res.text());return;}alert('Staff PIN: '+pin);sName.value='';sPhone.value='';loadAll();}
+async function loadStaff(){let r=await fetch(SUPABASE_URL+"/rest/v1/nurses?order=created_at.desc",{headers:H});let data=await r.json();let h='';data.forEach(s=>{h+=`<div class="item"><b>${s.full_name}</b> (${s.staff_type}) PIN:${s.pin} <button class="btn btn-r" onclick="delStaff('${s.id}')">Delete</button></div>`});staffList.innerHTML=h;}
+async function delStaff(id){if(!confirm('Delete staff?'))return;await fetch(SUPABASE_URL+"/rest/v1/nurses?id=eq."+id,{method:"DELETE",headers:H});loadAll();}
 </script></body></html>
