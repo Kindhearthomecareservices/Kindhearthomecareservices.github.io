@@ -1,17 +1,62 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - KindHeart</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><style>body{margin:0;font-family:Inter;background:#f8fbf8}.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#14495f;color:#fff;padding:16px;display:none} @media(min-width:800px){.sidebar{display:block}.main{margin-left:220px}}.card{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #eef4eb}.i{padding:10px;border:2px solid #ddeadd;border-radius:10px;width:100%;box-sizing:border-box;margin:4px 0}.btn{padding:10px 14px;border-radius:100px;border:0;font-weight:800;cursor:pointer}.badge{padding:4px 8px;border-radius:100px;font-size:11px;font-weight:800}.bad{background:#ffe8e8;color:#a00}.ok{background:#e8f5e3;color:#0A7A42}.warn{background:#fff8db;color:#8a5a00}</style></head><body>
-<div class="sidebar"><img src="logo.png" style="width:50px"><h3>KindHeart Admin</h3><p style="font-size:12px;opacity:.7">Right care at home.</p><div style="margin-top:20px"><div>📊 Dashboard</div><div style="margin-top:10px">👥 Patients</div><div>👩‍⚕️ Staff</div><div>🚨 Alerts</div></div></div>
-<div class="main" style="padding:16px;max-width:1100px"><h1>Good Morning, Admin</h1><p id="date"></p><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:10px"><div class="card"><small>ACTIVE PATIENTS</small><h2 id="c1">0</h2></div><div class="card"><small>ACTIVE STAFF</small><h2 id="c2">0</h2></div><div class="card"><small>VISITS TODAY</small><h2 id="c3">0</h2></div><div class="card" style="border-left:4px solid #FF6A00"><small>ALERTS</small><h2 id="c4">0</h2><small style="color:#FF6A00">Requires attention</small></div></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="card"><h3>Add Patient</h3><input id="pname" class="i" placeholder="Full Name"><input id="pphone" class="i" placeholder="Phone"><input id="ploc" class="i" placeholder="Location Eldoret"><input id="pall" class="i" placeholder="Allergies"><input id="pdiag" class="i" placeholder="Diagnosis"><button class="btn" style="background:#0A7A42;color:#fff;width:100%;margin-top:6px" onclick="addPat()">Save Patient</button></div><div class="card"><h3>Add Staff</h3><input id="sname" class="i" placeholder="Full Name"><input id="semail" class="i" placeholder="Email"><input id="spin" class="i" placeholder="PIN 1234"><select id="srole" class="i"><option>Nurse</option><option>Caregiver</option><option>Physiotherapist</option></select><button class="btn" style="background:#14495f;color:#fff;width:100%;margin-top:6px" onclick="addStaff()">Save Staff</button></div></div>
-<div class="card"><h3>Assign Staff → Patient</h3><div style="display:flex;gap:8px"><select id="ap" class="i"></select><select id="as" class="i"></select><button class="btn" style="background:#FF6A00;color:#fff" onclick="assign()">Assign</button></div></div>
-<div class="card"><h3>Recent Activity / Timeline</h3><div id="timeline"></div></div>
-<div class="card"><h3>Patients List</h3><div id="plist"></div></div></div>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - KindHeart</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-let patients=JSON.parse(localStorage.getItem('kh_p')||'[]'),staff=JSON.parse(localStorage.getItem('kh_s')||'[]'),assigns=JSON.parse(localStorage.getItem('kh_a')||'[]'),reports=JSON.parse(localStorage.getItem('kh_r')||'[]')
-document.getElementById('date').innerText=new Date().toDateString()
-function save(){localStorage.setItem('kh_p',JSON.stringify(patients));localStorage.setItem('kh_s',JSON.stringify(staff));localStorage.setItem('kh_a',JSON.stringify(assigns));localStorage.setItem('kh_r',JSON.stringify(reports)); render()}
-function addPat(){ let code='KHA'+Math.floor(1000+Math.random()*9000); patients.push({id:Date.now().toString(),full_name:pname.value,phone:pphone.value,location:ploc.value,allergies:pall.value,diagnosis:pdiag.value,family_code:code,care_status:'Active'}); alert('Patient saved! Family PIN: '+code); save() }
-function addStaff(){ staff.push({id:Date.now().toString(),full_name:sname.value,email:semail.value,pin:spin.value,role:srole.value}); alert('Staff saved: '+semail.value+' PIN '+spin.value); save() }
-function assign(){ if(!ap.value||!as.value) return alert('Select both'); assigns.push({patient_id:ap.value,staff_id:as.value}); alert('Assigned! Nurse will see patient now'); save() }
-function render(){ c1.innerText=patients.length; c2.innerText=staff.length; c3.innerText=reports.filter(r=>new Date(r.time).toDateString()===new Date().toDateString()).length; let alerts=reports.filter(r=>r.vitals&&r.vitals.flag_alert); c4.innerText=alerts.length; document.getElementById('ap').innerHTML=patients.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join(''); document.getElementById('as').innerHTML=staff.map(s=>`<option value="${s.id}">${s.full_name} - ${s.role}</option>`).join(''); document.getElementById('plist').innerHTML=patients.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span><b>${p.full_name}</b> - PIN: <code>${p.family_code}</code> - ${p.location}</span><span>${assigns.find(a=>a.patient_id===p.id)?'✅ Assigned':'⚠️ Not assigned'}</span></div>`).join(''); document.getElementById('timeline').innerHTML=reports.slice(-15).reverse().map(r=>{ let pat=patients.find(p=>p.id===r.patient_id); let stf=staff.find(s=>s.id===r.staff_id); return `<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><b>${pat?.full_name||'Patient'}</b> - ${r.note||r.type} ${r.status?'<span class="badge '+(r.status.includes('HIGH')?'bad':'ok')+'">'+r.status+'</span>':''} <small style="color:#888">by ${stf?.full_name||'Staff'} • ${new Date(r.time).toLocaleString()}</small></div>`}).join('')||'No activity yet - add patient first' }
-render()
+const SUPABASE_URL = "https://enlvelqeqbmhamyqtzxj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<style>body{margin:0;font-family:Inter;background:#f8fbf8}.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#14495f;color:#fff;padding:16px;display:none} @media(min-width:800px){.sidebar{display:block}.main{margin-left:220px}}.card{background:#fff;border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 4px 12px rgba(0,0,0,.06);border:1px solid #eef4eb}.i{padding:10px;border:2px solid #ddeadd;border-radius:10px;width:100%;box-sizing:border-box;margin:4px 0}.btn{padding:10px 14px;border-radius:100px;border:0;font-weight:800;cursor:pointer}.badge{padding:4px 8px;border-radius:100px;font-size:11px;font-weight:800}.bad{background:#ffe8e8;color:#a00}.ok{background:#e8f5e3;color:#0A7A42}</style>
+</head><body>
+<div class="sidebar"><img src="logo.png" style="width:50px"><h3>KindHeart Admin</h3><p style="font-size:12px;opacity:.7">Right care at home.</p></div>
+<div class="main" style="padding:16px;max-width:1100px"><h1>Good Morning, Admin</h1><p id="date"></p><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px"><div class="card"><small>ACTIVE PATIENTS</small><h2 id="c1">0</h2></div><div class="card"><small>ACTIVE STAFF</small><h2 id="c2">0</h2></div><div class="card"><small>VISITS TODAY</small><h2 id="c3">0</h2></div><div class="card" style="border-left:4px solid #FF6A00"><small>ALERTS</small><h2 id="c4">0</h2></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="card"><h3>Add Patient (Saves to Supabase)</h3><input id="pname" class="i" placeholder="Full Name"><input id="pphone" class="i" placeholder="Phone 07..."><input id="ploc" class="i" placeholder="Location Eldoret"><input id="pall" class="i" placeholder="Allergies"><input id="pdiag" class="i" placeholder="Diagnosis"><button class="btn" style="background:#0A7A42;color:#fff;width:100%;margin-top:6px" onclick="addPat()">Save Patient → Real DB</button><div id="pmsg" style="font-weight:700;margin-top:6px"></div></div><div class="card"><h3>Add Staff (Saves to Supabase)</h3><input id="sname" class="i" placeholder="Full Name"><input id="semail" class="i" placeholder="Email"><input id="spin" class="i" placeholder="PIN 1234"><select id="srole" class="i"><option>Nurse</option><option>Caregiver</option><option>Physiotherapist</option></select><button class="btn" style="background:#14495f;color:#fff;width:100%;margin-top:6px" onclick="addStaff()">Save Staff → Real DB</button><div id="smsg" style="font-weight:700;margin-top:6px"></div></div></div>
+<div class="card"><h3>Assign Staff → Patient</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ap" class="i" style="flex:1"></select><select id="as" class="i" style="flex:1"></select><button class="btn" style="background:#FF6A00;color:#fff" onclick="assign()">Assign</button></div></div>
+<div class="card"><h3>Recent Activity / Timeline (from Supabase)</h3><div id="timeline">Loading...</div></div>
+<div class="card"><h3>Patients List (Real DB)</h3><div id="plist">Loading...</div></div></div>
+<script>
+document.getElementById('date').innerText=new Date().toDateString();
+let patients=[], staff=[], assigns=[], reports=[];
+async function loadAll(){
+  let {data:p} = await supabaseClient.from('patients').select('*').order('created_at',{ascending:false});
+  let {data:s} = await supabaseClient.from('staff').select('*').order('created_at',{ascending:false});
+  let {data:a} = await supabaseClient.from('assignments').select('*');
+  let {data:r} = await supabaseClient.from('care_records').select('*').order('time',{ascending:false}).limit(30);
+  patients=p||[]; staff=s||[]; assigns=a||[]; reports=r||[];
+  render();
+}
+async function addPat(){
+  if(!pname.value) return alert('Enter name');
+  let code='KHA'+Math.floor(1000+Math.random()*9000);
+  let {data, error} = await supabaseClient.from('patients').insert({full_name:pname.value, phone:pphone.value, location:ploc.value, allergies:pall.value, diagnosis:pdiag.value, family_code:code}).select();
+  if(error){ pmsg.innerText='❌ '+error.message; return; }
+  pmsg.innerHTML=`✅ Saved! Family PIN: <b>${code}</b> - Give this to family`;
+  pname.value=''; pphone.value=''; ploc.value=''; pall.value=''; pdiag.value='';
+  loadAll();
+}
+async function addStaff(){
+  if(!semail.value || !spin.value) return alert('Enter email + pin');
+  let {data, error} = await supabaseClient.from('staff').insert({full_name:sname.value, email:semail.value.toLowerCase().trim(), pin:spin.value, role:srole.value}).select();
+  if(error){ smsg.innerText='❌ '+error.message; return; }
+  smsg.innerText=`✅ Staff saved: ${semail.value} PIN ${spin.value}`;
+  sname.value=''; semail.value=''; spin.value='';
+  loadAll();
+}
+async function assign(){
+  if(!ap.value||!as.value) return alert('Select both');
+  let {error} = await supabaseClient.from('assignments').insert({patient_id:ap.value, staff_id:as.value});
+  if(error) return alert(error.message);
+  alert('✅ Assigned! Nurse will now see patient on phone instantly');
+  loadAll();
+}
+function render(){
+  c1.innerText=patients.length; c2.innerText=staff.length;
+  c3.innerText=reports.filter(r=>new Date(r.time).toDateString()===new Date().toDateString()).length;
+  c4.innerText=reports.filter(r=>r.flag_alert).length;
+  document.getElementById('ap').innerHTML=patients.map(p=>`<option value="${p.id}">${p.full_name} - ${p.family_code}</option>`).join('');
+  document.getElementById('as').innerHTML=staff.map(s=>`<option value="${s.id}">${s.full_name} - ${s.role}</option>`).join('');
+  document.getElementById('plist').innerHTML=patients.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span><b>${p.full_name}</b> - PIN: <code style="background:#0A7A42;color:#fff;padding:2px 6px;border-radius:6px">${p.family_code}</code> - ${p.location||''}</span><span>${assigns.find(a=>a.patient_id===p.id)?'✅ Assigned':'⚠️ Not assigned'}</span></div>`).join('')||'No patients yet';
+  document.getElementById('timeline').innerHTML=reports.map(r=>`<div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px"><b>${patients.find(p=>p.id===r.patient_id)?.full_name||'Patient'}</b> - ${r.note||r.type} ${r.status?`<span class="badge ${r.flag_alert?'bad':'ok'}">${r.status}</span>`:''} ${r.flag_reason?`<span style="color:#c00">🚨 ${r.flag_reason}</span>`:''} <small style="color:#888">• ${new Date(r.time).toLocaleString()}</small></div>`).join('')||'No activity yet';
+}
+loadAll();
 </script></body></html>
