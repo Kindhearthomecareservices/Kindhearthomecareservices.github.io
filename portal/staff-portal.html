@@ -1,0 +1,65 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KindHeart Staff</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="brand-header"><div class="left"><img src="logo.png"><div><b>KindHeart Staff</b><br>0707546365 | kindhearthomecareservices.co.ke</div></div><div>Welcome <b id="staffName">Jackie (Nurse)</b></div></div>
+
+<div class="card">Patient: <select id="patientSel"><option value="KHA5577">Mama Jane - KHA5577 - Eldoret</option></select> <span id="careStarted"></span></div>
+
+<div class="card"><h3>Record Vitals — Auto Abnormal Detection (SpO2 89-100%)</h3>
+<div class="grid2"><input id="bp" class="input" placeholder="BP 120/80"><input id="temp" type="number" step="0.1" class="input" placeholder="Temp 36.5"></div>
+<div class="grid2"><input id="spo2" type="number" class="input" placeholder="SpO2 89-100"><input id="hr" type="number" class="input" placeholder="HR 80"></div>
+<textarea id="vNotes" class="input" placeholder="Notes"></textarea>
+<button class="btn btn-primary" onclick="saveVitals()">Save Vitals</button><div id="vAlert"></div></div>
+
+<div class="card"><h3 id="careLabel">Nursing Notes — What nursing care have you done?</h3>
+<textarea id="careContent" class="input" rows="3" placeholder="e.g. Bed bath done, wound dressing..."></textarea>
+<button class="btn btn-primary" onclick="saveCare()">Save Care Notes</button></div>
+
+<div class="card"><h3>Consumables Used Today + Stock Status</h3>
+<select id="item" class="input"><option>Diapers</option><option>Gloves</option><option>Wipes</option><option>Spirit</option></select>
+<div class="grid2"><input id="qty" type="number" class="input" placeholder="Qty used"><select id="stockStatus" class="input"><option>In Stock</option><option>About to Deplete</option><option>Needs Restock</option><option>OUT OF STOCK</option></select></div>
+<button class="btn btn-primary" onclick="saveInv()">Save Usage</button></div>
+
+<div class="card"><h3>Medications — Balance as per Treatment Sheet</h3><div id="medsList"></div></div>
+
+<div class="card"><h3>Doctor Appointment — Add for Family Reminder</h3>
+<div class="grid2"><input id="apDate" type="date" class="input"><input id="apTime" type="time" class="input"></div>
+<input id="hospital" class="input" placeholder="Hospital"><input id="doctor" class="input" placeholder="Doctor Name"><input id="purpose" class="input" placeholder="Purpose">
+<button class="btn btn-primary" onclick="saveAp()">Save Appointment</button></div>
+
+<div class="card"><h3>My Reports Today — What I have reported (No Edit/Delete)</h3><div id="myHistory"></div><small>Staff cannot edit/delete. Only Admin can.</small></div>
+
+<script src="app.js"></script>
+<script>
+let role='Nurse'; // Change to Caregiver for caregiver login
+document.getElementById('careLabel').innerText=role==='Nurse'?'Nursing Notes — What nursing care have you done today?':'Care Notes — What care have you done today?';
+function saveVitals(){
+ let bp=document.getElementById('bp').value||'120/80'; let temp=parseFloat(document.getElementById('temp').value||36.5);
+ let spo2=parseInt(document.getElementById('spo2').value||96); let hr=parseInt(document.getElementById('hr').value||80);
+ let res=checkVitals(bp,temp,spo2,hr);
+ let db=initDB(); db.vitals.push({id:'V'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', bp, temp, spo2, hr, notes:document.getElementById('vNotes').value, status:res.msg, is_abnormal:res.isAbnormal, created_at:new Date().toISOString()}); saveDB(db);
+ document.getElementById('vAlert').innerHTML=`<div class="${res.isAbnormal?'red-alert':'badge-normal'}" style="margin-top:8px">${res.msg}</div>`;
+ renderMeds(); renderHistory();
+}
+function saveCare(){
+ let db=initDB(); db.care_notes.push({id:'CN'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', staff_role:role, note_type:role==='Nurse'?'Nursing Notes':'Care Notes', content:document.getElementById('careContent').value, created_at:new Date().toISOString()}); saveDB(db); renderHistory(); alert('Saved');
+}
+function saveInv(){
+ let db=initDB(); db.inventory.push({id:'I'+Date.now(), patient_id:'KHA5577', item_name:document.getElementById('item').value, used_today:parseInt(document.getElementById('qty').value||1), remaining: document.getElementById('stockStatus').value==='OUT OF STOCK'?0:2, stock_status:document.getElementById('stockStatus').value, created_at:new Date().toISOString()}); saveDB(db); renderHistory();
+}
+function saveAp(){
+ let db=initDB(); db.appointments.push({id:'AP'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', appointment_date:document.getElementById('apDate').value, appointment_time:document.getElementById('apTime').value, hospital:document.getElementById('hospital').value, doctor_name:document.getElementById('doctor').value, purpose:document.getElementById('purpose').value, created_at:new Date().toISOString()}); saveDB(db); alert('Appointment saved for family');
+}
+function renderMeds(){
+ let db=initDB(); let html=''; db.treatment.filter(t=>t.patient_id==='KHA5577' && new Date()<=new Date(t.end_date)).forEach(t=>{
+   let day=dayCount(t.start_date); html+=`<div class="card"> ${t.drug_name} ${t.dosage} — Day ${day} of ${t.duration_days} — Total:${t.total_qty} • Remaining:${t.remaining_qty} • ${t.notes} <button onclick="giveMed('${t.id}',1)">Give 1</button></div>`;
+ }); document.getElementById('medsList').innerHTML=html||'No active meds';
+}
+function renderHistory(){
+ let db=initDB(); let html=''; let today=new Date().toISOString().slice(0,10);
+ db.vitals.filter(v=>v.created_at.slice(0,10)===today).forEach(v=>html+=`<div class="history-item">${v.created_at.slice(11,16)} Vitals: ${v.bp}, ${v.temp}°C, ${v.spo2}%, ${v.hr} - ${v.status}</div>`);
+ db.care_notes.filter(v=>v.created_at.slice(0,10)===today).forEach(v=>html+=`<div class="history-item">${v.created_at.slice(11,16)} ${v.note_type}: ${v.content}</div>`);
+ document.getElementById('myHistory').innerHTML=html||'No reports today';
+ let p=db.patients.find(p=>p.id==='KHA5577'); if(p) document.getElementById('careStarted').innerHTML=`Care Started: ${p.care_started_date} - Day ${dayCount(p.care_started_date)}`;
+}
+initDB();renderMeds();renderHistory();
+</script></body></html>
