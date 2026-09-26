@@ -1,65 +1,25 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KindHeart Staff</title><link rel="stylesheet" href="style.css"></head><body>
-<div class="brand-header"><div class="left"><img src="logo.png"><div><b>KindHeart Staff</b><br>0707546365 | kindhearthomecareservices.co.ke</div></div><div>Welcome <b id="staffName">Jackie (Nurse)</b></div></div>
-
-<div class="card">Patient: <select id="patientSel"><option value="KHA5577">Mama Jane - KHA5577 - Eldoret</option></select> <span id="careStarted"></span></div>
-
-<div class="card"><h3>Record Vitals — Auto Abnormal Detection (SpO2 89-100%)</h3>
-<div class="grid2"><input id="bp" class="input" placeholder="BP 120/80"><input id="temp" type="number" step="0.1" class="input" placeholder="Temp 36.5"></div>
-<div class="grid2"><input id="spo2" type="number" class="input" placeholder="SpO2 89-100"><input id="hr" type="number" class="input" placeholder="HR 80"></div>
-<textarea id="vNotes" class="input" placeholder="Notes"></textarea>
-<button class="btn btn-primary" onclick="saveVitals()">Save Vitals</button><div id="vAlert"></div></div>
-
-<div class="card"><h3 id="careLabel">Nursing Notes — What nursing care have you done?</h3>
-<textarea id="careContent" class="input" rows="3" placeholder="e.g. Bed bath done, wound dressing..."></textarea>
-<button class="btn btn-primary" onclick="saveCare()">Save Care Notes</button></div>
-
-<div class="card"><h3>Consumables Used Today + Stock Status</h3>
-<select id="item" class="input"><option>Diapers</option><option>Gloves</option><option>Wipes</option><option>Spirit</option></select>
-<div class="grid2"><input id="qty" type="number" class="input" placeholder="Qty used"><select id="stockStatus" class="input"><option>In Stock</option><option>About to Deplete</option><option>Needs Restock</option><option>OUT OF STOCK</option></select></div>
-<button class="btn btn-primary" onclick="saveInv()">Save Usage</button></div>
-
-<div class="card"><h3>Medications — Balance as per Treatment Sheet</h3><div id="medsList"></div></div>
-
-<div class="card"><h3>Doctor Appointment — Add for Family Reminder</h3>
-<div class="grid2"><input id="apDate" type="date" class="input"><input id="apTime" type="time" class="input"></div>
-<input id="hospital" class="input" placeholder="Hospital"><input id="doctor" class="input" placeholder="Doctor Name"><input id="purpose" class="input" placeholder="Purpose">
-<button class="btn btn-primary" onclick="saveAp()">Save Appointment</button></div>
-
-<div class="card"><h3>My Reports Today — What I have reported (No Edit/Delete)</h3><div id="myHistory"></div><small>Staff cannot edit/delete. Only Admin can.</small></div>
-
-<script src="app.js"></script>
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart Staff</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>*{box-sizing:border-box;font-family:Inter}body{margin:0;background:#f5f7f6}.top{background:#163f4f;color:#fff;padding:12px;display:flex;justify-content:space-between}.card{background:#fff;border-radius:12px;padding:12px;margin:10px}.inp{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin:4px 0}.btn{background:#163f4f;color:#fff;border:none;padding:10px 14px;border-radius:8px;font-weight:700}.tick{display:inline-block;width:36px;height:36px;border:2px solid #163f4f;border-radius:6px;text-align:center;line-height:34px;margin:4px;cursor:pointer;font-weight:700}.tick.done{background:#0a7a22;color:#fff;border-color:#0a7a22}.saved{color:#0a7a22;font-weight:800;font-size:12px;display:none;margin-left:8px}</style></head><body>
+<div id="login" style="height:100vh;display:flex;align-items:center;justify-content:center"><div class="card" style="width:92%;max-width:360px;text-align:center"><h3>Staff Login with PIN</h3><input id="pin" class="inp" placeholder="PIN e.g 1234" type="password"><button class="btn" style="width:100%" onclick="doLogin()">Login</button><p id="err" style="color:red;font-size:12px;display:none"></p></div></div>
+<div id="app" style="display:none"><div class="top"><div><b>Staff Portal</b><div style="font-size:11px"><span id="sName"></span> | 0707546365</div></div><button onclick="logout()" style="background:#fff;color:#163f4f;border:none;border-radius:12px;padding:6px 10px">Logout</button></div>
+<div class="card">Patient: <select id="pat" class="inp"></select></div>
+<div class="card"><b>Vitals — SpO2 89-100% Normal</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input id="bp" class="inp" placeholder="BP 120/80"><input id="temp" class="inp" placeholder="Temp"><input id="spo2" class="inp" placeholder="SpO2 89-100"><input id="hr" class="inp" placeholder="HR"></div><input id="vNote" class="inp" placeholder="Notes"><button class="btn" onclick="saveVitals()">Save Vitals</button><span id="vSaved" class="saved">✓ Saved</span></div>
+<div class="card"><b id="noteTitle">Care Notes</b><textarea id="cNote" class="inp" placeholder="What care have you done today?"></textarea><button class="btn" onclick="saveNote()">Save Notes</button><span id="nSaved" class="saved">✓ Saved</span></div>
+<div class="card"><b>Consumables + Consumed Status</b><select id="cItem" class="inp"><option>Diapers</option><option>Gloves</option><option>Wipes</option><option>Syringes</option><option>Catheter</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input id="cQty" class="inp" placeholder="Qty used"><select id="cStatus" class="inp" onchange="document.getElementById('cDays').style.display=this.value=='About to be depleted'?'block':'none'"><option>In Stock</option><option>About to be depleted</option><option>Depleted</option></select></div><input id="cDays" class="inp" placeholder="In how many days? e.g 3" style="display:none"><button class="btn" onclick="saveCons()">Save Usage</button><span id="csSaved" class="saved">✓ Saved</span></div>
+<div class="card"><b>Medications — Tick as per TDS/BD/OD/Nocte</b><div id="meds"></div></div>
+<div class="card"><b>My Reports Today (Cannot Edit/Delete)</b><div id="myRep" style="font-size:11px"></div></div>
+</div>
 <script>
-let role='Nurse'; // Change to Caregiver for caregiver login
-document.getElementById('careLabel').innerText=role==='Nurse'?'Nursing Notes — What nursing care have you done today?':'Care Notes — What care have you done today?';
-function saveVitals(){
- let bp=document.getElementById('bp').value||'120/80'; let temp=parseFloat(document.getElementById('temp').value||36.5);
- let spo2=parseInt(document.getElementById('spo2').value||96); let hr=parseInt(document.getElementById('hr').value||80);
- let res=checkVitals(bp,temp,spo2,hr);
- let db=initDB(); db.vitals.push({id:'V'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', bp, temp, spo2, hr, notes:document.getElementById('vNotes').value, status:res.msg, is_abnormal:res.isAbnormal, created_at:new Date().toISOString()}); saveDB(db);
- document.getElementById('vAlert').innerHTML=`<div class="${res.isAbnormal?'red-alert':'badge-normal'}" style="margin-top:8px">${res.msg}</div>`;
- renderMeds(); renderHistory();
-}
-function saveCare(){
- let db=initDB(); db.care_notes.push({id:'CN'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', staff_role:role, note_type:role==='Nurse'?'Nursing Notes':'Care Notes', content:document.getElementById('careContent').value, created_at:new Date().toISOString()}); saveDB(db); renderHistory(); alert('Saved');
-}
-function saveInv(){
- let db=initDB(); db.inventory.push({id:'I'+Date.now(), patient_id:'KHA5577', item_name:document.getElementById('item').value, used_today:parseInt(document.getElementById('qty').value||1), remaining: document.getElementById('stockStatus').value==='OUT OF STOCK'?0:2, stock_status:document.getElementById('stockStatus').value, created_at:new Date().toISOString()}); saveDB(db); renderHistory();
-}
-function saveAp(){
- let db=initDB(); db.appointments.push({id:'AP'+Date.now(), patient_id:'KHA5577', staff_id:'Jackie', appointment_date:document.getElementById('apDate').value, appointment_time:document.getElementById('apTime').value, hospital:document.getElementById('hospital').value, doctor_name:document.getElementById('doctor').value, purpose:document.getElementById('purpose').value, created_at:new Date().toISOString()}); saveDB(db); alert('Appointment saved for family');
-}
-function renderMeds(){
- let db=initDB(); let html=''; db.treatment.filter(t=>t.patient_id==='KHA5577' && new Date()<=new Date(t.end_date)).forEach(t=>{
-   let day=dayCount(t.start_date); html+=`<div class="card"> ${t.drug_name} ${t.dosage} — Day ${day} of ${t.duration_days} — Total:${t.total_qty} • Remaining:${t.remaining_qty} • ${t.notes} <button onclick="giveMed('${t.id}',1)">Give 1</button></div>`;
- }); document.getElementById('medsList').innerHTML=html||'No active meds';
-}
-function renderHistory(){
- let db=initDB(); let html=''; let today=new Date().toISOString().slice(0,10);
- db.vitals.filter(v=>v.created_at.slice(0,10)===today).forEach(v=>html+=`<div class="history-item">${v.created_at.slice(11,16)} Vitals: ${v.bp}, ${v.temp}°C, ${v.spo2}%, ${v.hr} - ${v.status}</div>`);
- db.care_notes.filter(v=>v.created_at.slice(0,10)===today).forEach(v=>html+=`<div class="history-item">${v.created_at.slice(11,16)} ${v.note_type}: ${v.content}</div>`);
- document.getElementById('myHistory').innerHTML=html||'No reports today';
- let p=db.patients.find(p=>p.id==='KHA5577'); if(p) document.getElementById('careStarted').innerHTML=`Care Started: ${p.care_started_date} - Day ${dayCount(p.care_started_date)}`;
-}
-initDB();renderMeds();renderHistory();
+const SUPA_URL="https://enlvelqeqbmhamyqtxzj.supabase.co";const SUPA_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw";const supa=supabase.createClient(SUPA_URL,SUPA_KEY);let cur=null;
+async function doLogin(){let {data,error}=await supa.from('nurses').select('*').eq('pin',pin.value).eq('is_active',true).single();if(error||!data){err.style.display='block';err.innerText='Wrong PIN - Ask Admin';return;}cur=data;sessionStorage.setItem('staff',JSON.stringify(data));showApp();}
+function showApp(){let s=JSON.parse(sessionStorage.getItem('staff'));if(!s)return;cur=s;login.style.display='none';app.style.display='block';sName.innerText=s.full_name+' ('+s.staff_type+')';noteTitle.innerText=s.staff_type.toLowerCase().includes('nurse')?'Nursing Notes — What nursing care have you done?':'Caregiving Notes — What caregiving have you done?';loadPats();}
+function logout(){sessionStorage.removeItem('staff');location.reload();}
+if(sessionStorage.getItem('staff'))showApp();
+async function loadPats(){let {data}=await supa.from('patients').select('*').eq('status','Active');pat.innerHTML=(data||[]).map(p=>`<option value="${p.id}">${p.full_name} - ${p.family_code}</option>`).join('');loadMeds();loadMy();}
+pat?.addEventListener('change',()=>{loadMeds();loadMy();});
+async function saveVitals(){let spo=parseInt(spo2.value)||0;let ab=spo && (spo<89||spo>100);if(ab&&!confirm('SpO2 '+spo+' abnormal 89-100%. Save with ALERT?'))return;let {error}=await supa.from('vitals').insert([{patient_id:pat.value,staff_id:cur.id,bp:bp.value,temp:temp.value,spo2:spo,hr:hr.value,note:vNote.value,is_abnormal:ab}]);if(error)alert(error.message);else{vSaved.style.display='inline';setTimeout(()=>vSaved.style.display='none',2000);bp.value='';temp.value='';spo2.value='';hr.value='';vNote.value='';loadMy();}}
+async function saveNote(){let {error}=await supa.from('care_notes').insert([{patient_id:pat.value,staff_id:cur.id,note:cNote.value,note_type:noteTitle.innerText.includes('Nursing')?'Nursing Notes':'Caregiving Notes'}]);if(error)alert(error.message);else{nSaved.style.display='inline';cNote.value='';setTimeout(()=>nSaved.style.display='none',2000);loadMy();}}
+async function saveCons(){let st=cStatus.value+(cDays.value?' - Will deplete in '+cDays.value+' days':'');let {error}=await supa.from('consumables').insert([{patient_id:pat.value,staff_id:cur.id,item_name:cItem.value,qty_used:cQty.value,status:st,days_to_deplete:cDays.value?parseInt(cDays.value):null}]);if(error)alert(error.message);else{csSaved.style.display='inline';setTimeout(()=>csSaved.style.display='none',2000);cQty.value='';loadMy();}}
+async function loadMeds(){let {data:sheet}=await supa.from('treatment_sheet').select('*').eq('patient_id',pat.value).eq('status','Active');let today=new Date().toISOString().split('T')[0];let {data:given}=await supa.from('medication_given').select('*').eq('patient_id',pat.value).eq('given_date',today);meds.innerHTML=(sheet||[]).map(s=>{let f=(s.frequency||'OD').toLowerCase();let cnt=1;if(f.includes('tds'))cnt=3;else if(f.includes('bd'))cnt=2;else if(f.includes('qds'))cnt=4;let label=f.includes('tds')?'TDS 3x':f.includes('bd')?'BD 2x':f.includes('nocte')||f.includes('night')?'Nocte Night':'OD 1x';let boxes='';for(let i=1;i<=cnt;i++){let done=(given||[]).some(g=>g.treatment_id===s.id&&g.dose_number===i);boxes+=`<span class="tick ${done?'done':''}" onclick="give('${s.id}',${i})">${done?'✓':i}</span>`;}return `<div style="border:1px solid #eee;padding:8px;border-radius:8px;margin:6px 0"><b>${s.medication_name} ${label}</b> - Total:${s.dosage} - ${boxes} <small>${(given||[]).filter(g=>g.treatment_id===s.id).length}/${cnt} today - Remaining ticked prevents repeat</small></div>`;}).join('')||'No meds - Admin to add in Treatment Sheet';}
+async function give(tid,num){if(!confirm('Confirm gave dose '+num+'? Time will be recorded'))return;let {error}=await supa.from('medication_given').insert([{treatment_id:tid,patient_id:pat.value,staff_id:cur.id,dose_number:num,given_date:new Date().toISOString().split('T')[0],given_time:new Date().toLocaleTimeString()}]);if(error)alert(error.message);else loadMeds(),loadMy();}
+async function loadMy(){let today=new Date().toISOString().split('T')[0];let {data:v}=await supa.from('vitals').select('*').eq('staff_id',cur.id).eq('patient_id',pat.value).order('created_at',{ascending:false}).limit(5);let {data:n}=await supa.from('care_notes').select('*').eq('staff_id',cur.id).eq('patient_id',pat.value).order('created_at',{ascending:false}).limit(5);let {data:g}=await supa.from('medication_given').select('*').eq('staff_id',cur.id).eq('patient_id',pat.value).eq('given_date',today).order('created_at',{ascending:false});myRep.innerHTML=(v||[]).map(r=>`<div>${new Date(r.created_at).toLocaleTimeString()} Vitals: ${r.bp||''} ${r.temp||''}°C ${r.spo2||''}% ${r.is_abnormal?'🔴 ABNORMAL':''}</div>`).join('')+(n||[]).map(r=>`<div>${new Date(r.created_at).toLocaleTimeString()} ${r.note_type}: ${r.note}</div>`).join('')+(g||[]).map(r=>`<div>${r.given_time} - Dose ${r.dose_number} given - ${r.treatment_id.substring(0,6)}</div>`).join('')||'No reports yet';}
 </script></body></html>
