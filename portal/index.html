@@ -1,29 +1,85 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart Homecare Services</title><style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system;background:#c5d6bf;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0}
-.card{background:#fff;width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;border-radius:32px 32px 0 0;margin-top:0}
-@media(min-width:600px){body{padding:20px}.card{min-height:auto;border-radius:32px;box-shadow:0 10px 40px rgba(0,0,0,.12);padding:36px 28px}}
-.logo-wrap{text-align:center;margin-bottom:18px}.logo-wrap img{height:86px;width:auto;object-fit:contain}
-h1{font-size:42px;font-weight:900;letter-spacing:-1px;color:#111;text-align:center;line-height:1}h1 span{color:#111}
-.sub{letter-spacing:4px;font-size:13px;color:#7a9a83;font-weight:700;margin:6px 0 10px;text-align:center}
-.tag{color:#6aa56d;font-weight:800;font-size:18px;text-align:center}.tag small{display:block;color:#6b7e6f;font-size:13px;font-weight:600;margin-top:4px}
-.btn{width:100%;padding:18px;border-radius:999px;border:0;font-weight:800;font-size:18px;cursor:pointer;margin-top:14px;transition:.15s}
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart Homecare</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui;background:#c5d6bf;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0}
+.card{background:#fff;width:100%;max-width:460px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:26px 20px;border-radius:32px 32px 0 0}
+@media(min-width:600px){body{padding:18px}.card{min-height:auto;border-radius:32px;box-shadow:0 10px 40px rgba(0,0,0,.12)}}
+.logo-wrap{text-align:center;margin-bottom:14px}.logo-wrap img{height:80px}
+h1{font-size:38px;font-weight:900;letter-spacing:-1px}.sub{letter-spacing:4px;font-size:12px;color:#7a9a83;font-weight:700;margin:4px 0}
+.tag{color:#6aa56d;font-weight:800;font-size:16px;text-align:center}.tag small{display:block;color:#6b7e6f;font-size:12px;font-weight:600;margin-top:4px}
+.btn{width:100%;padding:16px;border-radius:999px;border:0;font-weight:800;font-size:17px;cursor:pointer;margin-top:12px}
 .btn-dark{background:#12394c;color:#fff}.btn-green{background:#86bd68;color:#fff}.btn-outline{background:#fff;color:#12394c;border:2.5px solid #12394c}
-.btn:active{transform:scale(.98)}
-.foot{margin-top:18px;text-align:center}.pill{display:inline-block;border:2px solid #9cc196;color:#2d5a32;background:#e8f2e4;padding:10px 18px;border-radius:999px;font-weight:800;font-size:13px}
-.phone{margin-top:14px;font-weight:900;color:#2a3f45;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px}
-.secure{font-size:12px;color:#9aa99f;font-weight:600;margin:18px 0 6px;letter-spacing:.3px}
+.box{width:100%;margin-top:14px;background:#f6faf7;padding:14px;border-radius:16px;display:none}
+.box input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
+.box button{width:100%;padding:12px;border-radius:10px;border:0;background:#12394c;color:#fff;font-weight:800;margin-top:8px}
+.pill{display:inline-block;border:2px solid #9cc196;color:#2d5a32;background:#e8f2e4;padding:8px 14px;border-radius:999px;font-weight:800;font-size:12px;margin-top:12px}
+.phone{margin-top:10px;font-weight:900;color:#2a3f45;display:flex;justify-content:center;gap:6px}
+.back{font-size:13px;color:#12394c;font-weight:700;cursor:pointer;text-align:center;margin-top:10px}
+#msg{color:#d93025;font-size:13px;text-align:center;margin-top:8px}
 </style></head><body>
 <div class="card">
-<div class="logo-wrap"><img src="logo.png" onerror="this.src='https://i.imgur.com/8Km9tLL.png'" alt="KindHeart"><h1>KindHeart</h1><div class="sub">HOMECARE SERVICES</div><div class="tag">💚 Right care at home 💚<small>Compassionate Care. Professional Excellence.</small></div></div>
+<div class="logo-wrap"><img src="logo.png" onerror="this.src='https://i.imgur.com/8Km9tLL.png'"><h1>KindHeart</h1><div class="sub">HOMECARE SERVICES</div><div class="tag">💚 Right care at home 💚<small>Compassionate Care. Professional Excellence.</small></div></div>
 
-<button class="btn btn-dark" onclick="location.href='admin.html'">Admin Portal</button>
-<button class="btn btn-green" onclick="location.href='staff.html'">Staff Portal</button>
-<button class="btn btn-outline" onclick="location.href='family.html'">Family Portal</button>
+<div id="homeBtns" style="width:100%">
+<button class="btn btn-dark" onclick="openBox('admin')">Admin Portal</button>
+<button class="btn btn-green" onclick="openBox('staff')">Staff Portal</button>
+<button class="btn btn-outline" onclick="openBox('family')">Family Portal</button>
+</div>
 
-<div class="foot">
-<div class="secure">Secure • Premium • Eldoret & Beyond</div>
+<div id="box-admin" class="box">
+<b>Admin Login - Secure PIN Required</b>
+<input id="a_user" placeholder="Username: admin">
+<input id="a_pass" type="password" placeholder="Password: 0707546365">
+<button onclick="loginAdmin()">Login as Admin</button>
+<div class="back" onclick="goHome()">← Back to portals</div>
+</div>
+
+<div id="box-staff" class="box">
+<b>Staff Login - Phone + PIN</b>
+<input id="s_phone" placeholder="Phone e.g. 0712345678">
+<input id="s_pin" type="password" placeholder="PIN e.g. 1234">
+<button style="background:#86bd68" onclick="loginStaff()">Login as Staff</button>
+<div class="back" onclick="goHome()">← Back to portals</div>
+</div>
+
+<div id="box-family" class="box">
+<b>Family Login - Code + PIN</b>
+<input id="f_code" placeholder="Family Code e.g. FAM6688">
+<input id="f_pin" type="password" placeholder="Family PIN e.g. 6180">
+<button style="background:#fff;color:#12394c;border:2px solid #12394c" onclick="loginFamily()">Login as Family</button>
+<div class="back" onclick="goHome()">← Back to portals</div>
+</div>
+
+<p id="msg"></p>
 <div class="pill">www.kindhearthomecareservices.co.ke</div>
 <div class="phone">📞 0707546365</div>
 </div>
-</div>
-</body></html>
+<script>
+const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const SB_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw"; const sb=supabase.createClient(SB_URL, SB_KEY);
+function openBox(t){document.getElementById('homeBtns').style.display='none';['admin','staff','family'].forEach(k=>document.getElementById('box-'+k).style.display='none');document.getElementById('box-'+t).style.display='block';}
+function goHome(){['admin','staff','family'].forEach(k=>document.getElementById('box-'+k).style.display='none');document.getElementById('homeBtns').style.display='block';document.getElementById('msg').innerText=''}
+function loginAdmin(){
+ const u=document.getElementById('a_user').value.trim().toLowerCase(); const p=document.getElementById('a_pass').value.trim();
+ if(!u||!p){msg.innerText='Username + PIN required';return}
+ // SECURE - must match
+ if((u==='admin' && p==='0707546365') || (u==='kindheart' && p==='0707546365')){
+  localStorage.setItem('kh_role','admin'); localStorage.setItem('role','admin');
+  location.href='admin.html';
+ } else { msg.innerText='Wrong Admin PIN - Use admin / 0707546365'; }
+}
+async function loginStaff(){
+ const phone=s_phone.value.trim(); const pin=s_pin.value.trim(); if(!phone||!pin){msg.innerText='Phone + PIN required';return}
+ msg.innerText='Checking...';
+ const {data,error}=await sb.from('nurses').select('*').eq('phone',phone).eq('pin',pin).maybeSingle();
+ if(error){msg.innerText=error.message;return}
+ if(!data){msg.innerText='Wrong Phone/PIN - Ask admin';return}
+ localStorage.setItem('nurse_id',data.id); localStorage.setItem('staff_id',data.id); localStorage.setItem('nurse_name',data.full_name); localStorage.setItem('staff_type',data.staff_type||data.role);
+ localStorage.setItem('role','staff'); location.href='staff.html';
+}
+async function loginFamily(){
+ const code=f_code.value.trim().toUpperCase(); const pin=f_pin.value.trim(); if(!code||!pin){msg.innerText='Code + PIN required';return}
+ msg.innerText='Checking...';
+ const {data,error}=await sb.from('patients').select('*').eq('family_code',code).eq('family_pin',pin).maybeSingle();
+ if(error){msg.innerText=error.message;return}
+ if(!data){msg.innerText='Wrong Code/PIN - Ask admin';return}
+ localStorage.setItem('patient_id',data.id); localStorage.setItem('role','family'); location.href='family.html';
+}
+</script></body></html>
