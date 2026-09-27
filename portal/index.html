@@ -5,51 +5,98 @@
 <script src="./config.js"></script>
 <style>
 body{margin:0;min-height:100vh;background:#c7d6c0;display:grid;place-items:center;padding:18px;font-family:system-ui}
-.card{background:#fff;width:100%;max-width:360px;border-radius:26px;padding:28px 20px 20px;box-shadow:0 18px 45px rgba(0,0,0,.18);text-align:center}
-.logo{width:92px;height:92px;margin:0 auto 6px;display:grid;place-items:center}.logo img{width:100%;height:100%;object-fit:contain;border-radius:12px}
-.brand{font-size:36px;font-weight:900;letter-spacing:-.6px;line-height:1;margin-top:6px}.brand.dark{color:#153a4d}.brand.green{color:#6aa84f}
+.card{background:#fff;width:100%;max-width:380px;border-radius:26px;padding:28px 20px 20px;box-shadow:0 18px 45px rgba(0,0,0,.18);text-align:center}
+.logo{width:110px;height:110px;margin:0 auto 6px}.logo img{width:100%;height:100%;object-fit:contain}
+.brand{font-size:38px;font-weight:900;line-height:1}.brand .d{color:#153a4d}.brand .g{color:#6aa84f}
 .sub{font-size:11px;letter-spacing:3.2px;font-weight:800;color:#8aa18a;margin:4px 0 12px}
-.motto{color:#6aa84f;font-weight:800;font-size:15px;margin:0}.motto2{font-size:11px;color:#6b7d6b;font-weight:600;margin:2px 0 20px}
-.btn{width:100%;padding:14px 16px;border-radius:999px;font-weight:800;font-size:15px;border:2px solid transparent;cursor:pointer;margin-bottom:12px;display:block}
+.motto{color:#6aa84f;font-weight:800;font-size:16px;margin:0}.motto2{font-size:11px;color:#6b7d6b;font-weight:600;margin:4px 0 22px}
+.btn{width:100%;padding:15px 16px;border-radius:999px;font-weight:800;font-size:16px;border:2px solid transparent;cursor:pointer;margin-bottom:12px;display:block}
 .btn-admin{background:#153a4d;color:#fff}.btn-nurse{background:#7ab55e;color:#fff}.btn-family{background:#fff;color:#153a4d;border-color:#153a4d}
-.meta{margin-top:6px;font-size:11px;color:#9aad9a;font-weight:600}.web{display:inline-block;margin-top:10px;padding:8px 16px;border-radius:999px;background:#d6e8cf;border:1.6px solid #7ab55e;color:#2e5a2e;font-weight:800;font-size:12px;text-decoration:none}
-.phone{display:block;margin-top:12px;color:#153a4d;font-weight:800;text-decoration:none;font-size:12px}
-.modal{position:fixed;inset:0;background:rgba(20,45,60,.48);display:none;place-items:center;padding:16px;z-index:20}.modal.show{display:grid}
-.box{background:#fff;border-radius:18px;padding:20px;width:100%;max-width:320px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
-.box h4{margin:0 0 12px;color:#153a4d;text-align:center}
-.box input{width:100%;padding:14px;border:1px solid #d0d0d0;border-radius:12px;margin:8px 0;font-size:16px;letter-spacing:4px;text-align:center}
-.err{color:#d93025;font-size:12px;display:none;margin-top:6px;text-align:center}
+.meta{margin-top:8px;font-size:11px;color:#9aad9a;font-weight:600}.web{display:inline-block;margin-top:12px;padding:9px 18px;border-radius:999px;background:#d6e8cf;border:1.6px solid #7ab55e;color:#2e5a2e;font-weight:800;font-size:13px;text-decoration:none}
+.phone{display:block;margin-top:12px;color:#153a4d;font-weight:800;text-decoration:none;font-size:14px}
+.modal{position:fixed;inset:0;background:rgba(20,45,60,.55);display:none;place-items:center;padding:16px;z-index:99}.modal.show{display:grid}
+.box{background:#fff;border-radius:20px;padding:22px;width:100%;max-width:320px;box-shadow:0 20px 50px rgba(0,0,0,.3);text-align:center}
+.box h4{margin:0 0 14px;color:#153a4d}
+.box input{width:100%;padding:14px;border:1px solid #ccc;border-radius:12px;margin:8px 0;font-size:18px;letter-spacing:5px;text-align:center;box-sizing:border-box}
+.err{color:#d93025;font-size:13px;display:none;margin-top:8px}
 </style></head><body>
 <div class="card">
-  <div class="logo"><img src="./logo.png"></div>
-  <div class="brand"><span class="dark">Kind</span><span class="green">Heart</span></div>
-  <div class="sub">HOMECARE SERVICES</div>
-  <div class="motto">💚 Right care at home 💚</div>
-  <div class="motto2">Compassionate Care. Professional Excellence.</div>
-  <button class="btn btn-admin" onclick="openLogin('admin')">Admin Portal</button>
-  <button class="btn btn-nurse" onclick="openLogin('staff')">Nurse / Caregiver Portal</button>
-  <button class="btn btn-family" onclick="openLogin('family')">Family Portal</button>
-  <div class="meta">Secure • Premium • Eldoret & Beyond</div>
-  <a id="webLink" class="web" href="https://kindhearthomecareservices.co.ke" target="_blank">www.kindhearthomecareservices.co.ke</a>
-  <a id="phoneLink" class="phone" href="tel:0707546365">📞 0707546365</a>
+<div class="logo"><img src="./logo.png" alt="KindHeart"></div>
+<div class="brand"><span class="d">Kind</span><span class="g">Heart</span></div>
+<div class="sub">HOMECARE SERVICES</div>
+<div class="motto">💚 Right care at home 💚</div>
+<div class="motto2">Compassionate Care. Professional Excellence.</div>
+<button class="btn btn-admin" id="bAdmin">Admin Portal</button>
+<button class="btn btn-nurse" id="bNurse">Nurse / Caregiver Portal</button>
+<button class="btn btn-family" id="bFamily">Family Portal</button>
+<div class="meta">Secure • Premium • Eldoret & Beyond</div>
+<a id="webLink" class="web" href="https://kindhearthomecareservices.co.ke" target="_blank">www.kindhearthomecareservices.co.ke</a>
+<a id="phoneLink" class="phone" href="tel:0707546365">📞 0707546365</a>
 </div>
-<div id="modal" class="modal" onclick="if(event.target===this)closeM()"><div class="box">
-<h4 id="mTitle"></h4><input id="mPin" type="password" autocomplete="off" inputmode="numeric" placeholder="••••">
-<button class="btn btn-admin" style="margin:0" onclick="go()">Enter</button>
-<button class="btn btn-family" style="margin-top:8px" onclick="closeM()">Cancel</button>
-<div id="mErr" class="err"></div></div></div>
+
+<div id="modal" class="modal"><div class="box">
+<h4 id="mTitle">Enter PIN</h4>
+<input id="mPin" type="password" placeholder="••••" autocomplete="off" inputmode="numeric">
+<button class="btn btn-admin" id="mGo" style="margin:10px 0 0">Enter</button>
+<button class="btn btn-family" id="mCancel" style="margin-top:10px">Cancel</button>
+<div id="mErr" class="err">Incorrect</div>
+</div></div>
+
 <script>
-const supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`; document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
-document.getElementById('webLink').href=`https://${ORG_WEBSITE}`; document.getElementById('webLink').textContent=ORG_WEBSITE;
-let cur='admin';
-function openLogin(r){cur=r;document.getElementById('modal').classList.add('show');const t=document.getElementById('mTitle'),i=document.getElementById('mPin');i.value='';i.type=r==='family'?'text':'password';i.placeholder='••••';t.textContent=r==='family'?'Enter Code':'Enter PIN';setTimeout(()=>i.focus(),100);}
-function closeM(){document.getElementById('modal').classList.remove('show');}
-function err(m){const e=document.getElementById('mErr');e.style.display='block';e.textContent=m;setTimeout(()=>e.style.display='none',3000);}
-async function go(){const v=document.getElementById('mPin').value.trim();if(!v)return err('Incorrect');
-if(cur==='admin'){if(v===ADMIN_PIN){localStorage.setItem('kh_role','admin');location.href='./admin.html';}else err('Incorrect');}
-if(cur==='staff'){const {data,error}=await supa.from('nurses').select('*').eq('pin',v).eq('is_active',true).single();if(error||!data)return err('Incorrect');localStorage.setItem('kh_role','staff');localStorage.setItem('kh_nurse_id',data.id);localStorage.setItem('kh_nurse_name',data.full_name);location.href='./staff.html';}
-if(cur==='family'){const c=v.toUpperCase();const {data,error}=await supa.from('patients').select('*').or(`family_code.eq.${c},family_pin.eq.${c}`).eq('status','Active').single();if(error||!data)return err('Incorrect');localStorage.setItem('kh_role','family');localStorage.setItem('kh_patient_id',data.id);location.href='./family.html';}
+// Use config.js constants
+try{
+document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`;
+document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
+document.getElementById('webLink').href=`https://${ORG_WEBSITE}`;
+document.getElementById('webLink').textContent=ORG_WEBSITE;
+}catch(e){}
+
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let curRole='admin';
+const modal=document.getElementById('modal');
+const mPin=document.getElementById('mPin');
+const mTitle=document.getElementById('mTitle');
+const mErr=document.getElementById('mErr');
+
+function openLogin(r){
+curRole=r;
+mTitle.textContent = r==='family' ? 'Enter Code' : 'Enter PIN';
+mPin.value='';
+mPin.type = r==='family' ? 'text' : 'password';
+mPin.placeholder='••••';
+mErr.style.display='none';
+modal.classList.add('show');
+setTimeout(()=>mPin.focus(),100);
 }
-document.getElementById('mPin').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+function closeM(){ modal.classList.remove('show'); }
+function showErr(){ mErr.style.display='block'; setTimeout(()=>mErr.style.display='none',2500); }
+
+document.getElementById('bAdmin').addEventListener('click',()=>openLogin('admin'));
+document.getElementById('bNurse').addEventListener('click',()=>openLogin('staff'));
+document.getElementById('bFamily').addEventListener('click',()=>openLogin('family'));
+document.getElementById('mCancel').addEventListener('click',closeM);
+modal.addEventListener('click',e=>{ if(e.target===modal) closeM(); });
+
+async function go(){
+const v=mPin.value.trim();
+if(!v) return showErr();
+if(curRole==='admin'){
+if(v===ADMIN_PIN){ localStorage.setItem('kh_role','admin'); location.href='./admin.html'; } else showErr();
+}
+if(curRole==='staff'){
+const {data,error}=await supa.from('nurses').select('*').eq('pin',v).eq('is_active',true).single();
+if(error||!data) return showErr();
+localStorage.setItem('kh_role','staff'); localStorage.setItem('kh_nurse_id',data.id); localStorage.setItem('kh_nurse_name',data.full_name);
+location.href='./staff.html';
+}
+if(curRole==='family'){
+const c=v.toUpperCase();
+const {data,error}=await supa.from('patients').select('*').or(`family_code.eq.${c},family_pin.eq.${c}`).eq('status','Active').single();
+if(error||!data) return showErr();
+localStorage.setItem('kh_role','family'); localStorage.setItem('kh_patient_id',data.id);
+location.href='./family.html';
+}
+}
+document.getElementById('mGo').addEventListener('click',go);
+mPin.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
 </script></body></html>
