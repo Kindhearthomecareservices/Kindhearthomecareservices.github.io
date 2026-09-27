@@ -1,36 +1,33 @@
-<!DOCTYPE html>
-<html><head>
+<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Staff - KindHeart</title>
+<title>Staff - KindHeart Homecare Services</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
 <style>
 :root{--green:#0f7a4d;--bg:#f6faf8}body{margin:0;font-family:system-ui;background:var(--bg)}
-.header{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.logo{font-weight:800;color:var(--green)} a{color:var(--green);text-decoration:none;font-weight:600;margin-left:12px;font-size:13px}
+.header{background:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;color:#153a4d}.logo img{height:32px;width:auto;object-fit:contain}
+.header a{color:#153a4d;text-decoration:none;font-weight:700;margin-left:8px;font-size:12px;background:#e7f5ee;padding:6px 10px;border-radius:20px}
 .tabs{display:flex;gap:8px;padding:10px 16px;background:#fff;overflow:auto;border-bottom:1px solid #eee}
 .tab{padding:8px 14px;border-radius:20px;background:#eef4f0;border:0;font-weight:600;cursor:pointer;white-space:nowrap}
-.tab.active{background:var(--green);color:#fff}
+.tab.active{background:#153a4d;color:#fff}
 .container{max-width:1100px;margin:14px auto;padding:0 12px}
 .card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:12px}
 input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin:6px 0;box-sizing:border-box}
-button{padding:10px 14px;border:0;border-radius:8px;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
+button{padding:10px 14px;border:0;border-radius:8px;background:#153a4d;color:#fff;font-weight:700;cursor:pointer}
 button.out{background:#eee;color:#222}
 .patientHead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
 .allergy{background:#fde8e8;color:#c00;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:800}
-.badge{padding:3px 8px;border-radius:12px;font-size:11px;background:#e7f5ee;color:var(--green)}.badge.crit{background:#fde8e8;color:#c00}
+.badge{padding:3px 8px;border-radius:12px;font-size:11px;background:#e7f5ee;color:#153a4d}.badge.crit{background:#fde8e8;color:#c00}
 .row{padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;display:flex;justify-content:space-between}
-</style>
-</head><body>
-<div class="header"><div class="logo">KH Staff — <span id="staffName"></span></div><div><a href="tel:0707546365">0707546365</a><a href="https://kindhearthomecareservices.co.ke" target="_blank">Website</a><a href="./index.html">Logout</a></div></div>
-
+</style></head><body>
+<div class="header"><div class="logo"><img src="./logo.png"> Staff — <span id="staffName"></span></div><div><a id="phoneLink" href="tel:0707546365">📞 0707546365</a><a id="webLink" href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a><a href="./index.html">Logout</a></div></div>
 <div class="container">
 <div class="card">
 <label>Select My Patient (Assigned to you)</label>
 <select id="patientSelect" onchange="loadPatient()"></select>
 <div id="patientInfo" class="patientHead" style="margin-top:10px"></div>
 </div>
-
 <div class="tabs">
 <button class="tab active" onclick="openTab('vitals')">Vitals</button>
 <button class="tab" onclick="openTab('notes')">Nursing Notes</button>
@@ -39,18 +36,17 @@ button.out{background:#eee;color:#222}
 <button class="tab" onclick="openTab('consum')">Consumables</button>
 <button class="tab" onclick="openTab('missing')">Report Missing</button>
 </div>
-
 <div class="card" id="formArea"></div>
 <div class="card"><h4 style="margin:0 0 8px" id="listTitle">Records</h4><div id="list"></div></div>
 </div>
-
 <script>
 const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 if(localStorage.getItem('kh_role')!=='staff'){location.href='./index.html'}
 const nurseId = localStorage.getItem('kh_nurse_id');
 document.getElementById('staffName').textContent = localStorage.getItem('kh_nurse_name')||'Staff';
+document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`; document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
+document.getElementById('webLink').href=`https://${ORG_WEBSITE}`;
 let currentPatient=null, currentTab='vitals', patients=[];
-
 async function init(){
   const {data} = await supa.from('patient_staff').select('patient_id,shift_type,patients(*)').eq('nurse_id',nurseId).eq('is_active',true);
   patients = (data||[]).map(d=>({...d.patients, shift_type:d.shift_type}));
@@ -58,7 +54,6 @@ async function init(){
   if(patients[0]){ sel.value=patients[0].id; loadPatient(); }
 }
 init();
-
 async function loadPatient(){
   const id=document.getElementById('patientSelect').value; if(!id)return;
   currentPatient = patients.find(p=>p.id===id);
@@ -66,7 +61,6 @@ async function loadPatient(){
   render();
 }
 function openTab(t){ currentTab=t; document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); render(); }
-
 async function render(){
   if(!currentPatient)return; const form=document.getElementById('formArea'); const list=document.getElementById('list'); const title=document.getElementById('listTitle');
   if(currentTab==='vitals'){
@@ -89,12 +83,12 @@ async function render(){
   if(currentTab==='treatment'){
     title.textContent='Treatment Sheet - Mark Administered';
     const {data}=await supa.from('treatment_sheet').select('*').eq('patient_id',currentPatient.id).eq('status','Active').order('created_at',{ascending:false});
-    form.innerHTML=`<div class="small" style="margin-bottom:8px">Tap "Give" to mark administered - reduces Remaining count</div>`;
+    form.innerHTML=`<div style="font-size:12px;margin-bottom:8px;color:#666">Tap "Give" to mark administered - reduces Remaining count</div>`;
     list.innerHTML=(data||[]).map(t=>`<div class="row"><div><b>${t.drug_name} ${t.dose||''}</b> ${t.frequency} | Duration:${t.duration||'-'}<br><small>Given:${t.quantity_given} Remaining:${t.quantity_remaining}</small></div><div><button onclick="giveMed('${t.id}')">Give</button></div></div>`).join('')||'No active treatment';
   }
   if(currentTab==='meds'){
     title.textContent='Medication Administered Log';
-    form.innerHTML=`<div class="small">Log auto-created when you Give from Treatment tab</div>`;
+    form.innerHTML=`<div style="font-size:12px;color:#666">Log auto-created when you Give from Treatment tab</div>`;
     const {data}=await supa.from('medication_given').select('*,treatment_sheet(drug_name)').eq('patient_id',currentPatient.id).order('created_at',{ascending:false}).limit(30);
     list.innerHTML=(data||[]).map(m=>`<div class="row"><div>${m.treatment_sheet?.drug_name||'Med'} given<br><small>${new Date(m.time_given).toLocaleString()}</small></div></div>`).join('');
   }
@@ -110,7 +104,6 @@ async function render(){
     list.innerHTML=(data||[]).map(r=>`<div class="row"><div>⚠️ ${r.item_name} - ${r.urgency}<br><small>${r.notes||''} - ${new Date(r.created_at).toLocaleString()}</small></div></div>`).join('');
   }
 }
-
 async function saveVitals(){
   const payload={ patient_id:currentPatient.id, nurse_id:nurseId,
     bp_systolic:parseInt(document.getElementById('v_sys').value)||null, bp_diastolic:parseInt(document.getElementById('v_dia').value)||null,
@@ -128,5 +121,4 @@ async function giveMed(tid){
 }
 async function saveConsum(){ const item_name=document.getElementById('c_item').value.trim(); const quantity=parseInt(document.getElementById('c_qty').value)||1; if(!item_name)return; await supa.from('consumables').insert({patient_id:currentPatient.id,nurse_id:nurseId,item_name,quantity}); render(); }
 async function saveMissing(){ const item_name=document.getElementById('m_item').value.trim(); const urgency=document.getElementById('m_urg').value; const notes=document.getElementById('m_notes').value; if(!item_name)return; await supa.from('missing_reports').insert({patient_id:currentPatient.id,nurse_id:nurseId,item_name,urgency,notes}); alert('Reported'); render(); }
-</script>
-</body></html>
+</script></body></html>
