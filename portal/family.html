@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html><head>
+<!DOCTYPE html><html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Family - KindHeart</title>
+<title>Family - KindHeart Homecare Services</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
 <style>
 :root{--green:#0f7a4d;--bg:#fafcfb}body{margin:0;font-family:system-ui;background:var(--bg);color:#222}
-.header{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.logo{font-weight:800;color:var(--green)} a{color:var(--green);text-decoration:none;font-weight:600;margin-left:12px;font-size:13px}
+.header{background:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;color:#153a4d}.logo img{height:32px;width:auto;object-fit:contain}
+.header a{color:#153a4d;text-decoration:none;font-weight:700;margin-left:8px;font-size:12px;background:#e7f5ee;padding:6px 10px;border-radius:20px}
 .container{max-width:1000px;margin:16px auto;padding:0 12px}
-.hero{background:linear-gradient(135deg,#0f7a4d,#14a06a);color:#fff;border-radius:16px;padding:18px}
+.hero{background:linear-gradient(135deg,#153a4d,#0f7a4d);color:#fff;border-radius:16px;padding:18px}
 .hero h2{margin:0} .hero small{opacity:.9}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
 .card{background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
@@ -22,18 +22,14 @@
 .allergy{border:1px solid #f5c6c6;background:#fff5f5;color:#c00;padding:8px;border-radius:10px;font-weight:700;font-size:12px}
 </style>
 </head><body>
-<div class="header"><div class="logo">KH KindHeart Family</div><div><a href="tel:0707546365">📞 0707546365</a><a href="https://kindhearthomecareservices.co.ke" target="_blank">Website</a><a href="./index.html">Logout</a></div></div>
-
+<div class="header"><div class="logo"><img src="./logo.png"> KindHeart Family</div><div><a id="phoneLink" href="tel:0707546365">📞 0707546365</a><a id="webLink" href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a><a href="./index.html">Logout</a></div></div>
 <div class="container">
 <div class="hero" id="hero">Loading patient...</div>
-
 <div class="grid" id="vitalsGrid"></div>
-
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
 <div class="card"><h4 style="margin:0 0 8px">💊 Treatment Plan</h4><div id="treatment"></div></div>
 <div class="card"><h4 style="margin:0 0 8px">✅ Medications Administered Today</h4><div id="meds"></div></div>
 </div>
-
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
 <div class="card"><h4 style="margin:0 0 8px">📝 Nursing Care Done</h4><div id="notes" class="timeline"></div></div>
 <div class="card"><h4 style="margin:0 0 8px">👩‍⚕️ Assigned Caregivers</h4><div id="staff"></div>
@@ -41,17 +37,20 @@
 </div>
 </div>
 </div>
-
 <script>
 const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 if(localStorage.getItem('kh_role')!=='family'){location.href='./index.html'}
 const patientId = localStorage.getItem('kh_patient_id');
+// USE CONFIG
+document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`;
+document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
+document.getElementById('webLink').href=`https://${ORG_WEBSITE}`;
+document.querySelectorAll('a[href*="0707"]').forEach(a=>a.href=`tel:${ORG_PHONE}`);
 
 async function load(){
   const {data:p} = await supa.from('patients').select('*').eq('id',patientId).single();
   document.getElementById('hero').innerHTML=`<h2>${p.full_name} - ${p.age||''}y</h2><small>${p.diagnosis||''} | Location: ${p.location||''} | Phone: ${p.phone||''}</small><div style="margin-top:10px">${p.allergies?`<div class="allergy">⚠️ Allergy: ${p.allergies}</div>`:''}</div>`;
-
-  const {data:vitals} = await supa.from('vitals').select('*').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(1).single();
+  const {data:vitals} = await supa.from('vitals').select('*').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(1).maybeSingle();
   const v = vitals||{};
   function color(val,type){
     if(!val) return '<span style="color:#999">--</span>';
@@ -69,24 +68,18 @@ async function load(){
   <div class="card"><small>Pulse</small><div class="kpi">${v.pulse||'--'} bpm</div></div>
   <div class="card"><small>Weight</small><div class="kpi">${v.weight||'--'} kg</div></div>
   `;
-
   const {data:treat} = await supa.from('treatment_sheet').select('*').eq('patient_id',patientId).order('created_at',{ascending:false});
   document.getElementById('treatment').innerHTML=(treat||[]).map(t=>`<div style="padding:8px 0;border-bottom:1px solid #f0f0f0"><b>${t.drug_name} ${t.dose||''}</b> ${t.frequency}<br><small>Duration: ${t.duration||'-'} | Given:${t.quantity_given} | Remaining: <b>${t.quantity_remaining}</b> | ${t.status}</small></div>`).join('')||'No treatment';
-
   const {data:meds} = await supa.from('medication_given').select('*,nurses(full_name),treatment_sheet(drug_name)').eq('patient_id',patientId).order('time_given',{ascending:false}).limit(20);
   document.getElementById('meds').innerHTML=(meds||[]).map(m=>`<div style="padding:6px 0;border-bottom:1px solid #f0f0f0"><b>${m.treatment_sheet?.drug_name||'Medication'}</b> administered<br><small>By ${m.nurses?.full_name||'Staff'} at ${new Date(m.time_given).toLocaleString()}</small></div>`).join('')||'No meds today';
-
   const {data:notes} = await supa.from('care_notes').select('*,nurses(full_name)').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(20);
   document.getElementById('notes').innerHTML=(notes||[]).map(n=>`<div><b>${new Date(n.created_at).toLocaleString()}</b> - ${n.nurses?.full_name||''}<br>${n.note}</div>`).join('')||'No notes';
-
   const {data:assign} = await supa.from('patient_staff').select('*,nurses(full_name,phone)').eq('patient_id',patientId).eq('is_active',true);
   document.getElementById('staff').innerHTML=(assign||[]).map(a=>`<div style="padding:6px 0"><b>${a.nurses?.full_name}</b> - ${a.shift_type}<br><small><a href="tel:${a.nurses?.phone}">${a.nurses?.phone}</a></small></div>`).join('')||'Not assigned';
-
   const {data:cons} = await supa.from('consumables').select('*').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(10);
   const {data:miss} = await supa.from('missing_reports').select('*').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(10);
   document.getElementById('consum').innerHTML=`${(cons||[]).map(c=>`• ${c.item_name} x${c.quantity}<br>`).join('')}${(miss||[]).map(r=>`⚠️ Needs ${r.item_name} (${r.urgency})<br>`).join('')}`;
 }
 load();
-setInterval(load,15000); // real-time refresh every 15s
-</script>
-</body></html>
+setInterval(load,15000);
+</script></body></html>
