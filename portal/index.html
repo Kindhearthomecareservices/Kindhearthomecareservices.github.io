@@ -1,47 +1,29 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart - Login</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>.card{border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}.tab-active{background:#0f766e;color:#fff}</style></head><body class="bg-[#f6f7f8] min-h-screen flex items-center justify-center p-4">
-<div class="w-full max-w-5xl grid lg:grid-cols-2 gap-6">
-<div class="card bg-white p-8 flex flex-col justify-center"><div class="flex items-center gap-3 mb-6"><img src="logo.png" class="h-12 w-12 rounded-full bg-teal-50"><div><p class="font-bold text-lg">KindHeart Homecare Services</p><p class="text-xs text-gray-500">Home Care System - Premium Live</p></div></div><h2 class="font-bold text-2xl">Care that comes home</h2><p class="text-sm text-gray-500 mt-2">Admin manages system. Staff (Nurse/Caregiver) records vitals, care notes, meds AM/PM. Family sees everything live premium - trends, attending caregiver, remaining meds.</p><div class="mt-6 bg-teal-50 p-4 rounded-2xl"><p class="text-xs font-bold">📞 0707546365</p><p class="text-xs text-gray-600 mt-1">🌐 kindhearthomecareservices.co.ke</p><p class="text-xs text-gray-500 mt-2">O2 90-100 Normal | Sugar mmol/L</p></div></div>
-<div class="card bg-white p-6"><div class="flex gap-2 mb-6"><button onclick="tab('family')" id="t-family" class="tab-active px-4 py-2 rounded-full text-sm flex-1">Family</button><button onclick="tab('staff')" id="t-staff" class="px-4 py-2 bg-gray-100 rounded-full text-sm flex-1">Staff</button><button onclick="tab('admin')" id="t-admin" class="px-4 py-2 bg-gray-100 rounded-full text-sm flex-1">Admin</button></div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KindHeart Homecare Services</title><style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:system-ui,-apple-system;background:#c5d6bf;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0}
+.card{background:#fff;width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;border-radius:32px 32px 0 0;margin-top:0}
+@media(min-width:600px){body{padding:20px}.card{min-height:auto;border-radius:32px;box-shadow:0 10px 40px rgba(0,0,0,.12);padding:36px 28px}}
+.logo-wrap{text-align:center;margin-bottom:18px}.logo-wrap img{height:86px;width:auto;object-fit:contain}
+h1{font-size:42px;font-weight:900;letter-spacing:-1px;color:#111;text-align:center;line-height:1}h1 span{color:#111}
+.sub{letter-spacing:4px;font-size:13px;color:#7a9a83;font-weight:700;margin:6px 0 10px;text-align:center}
+.tag{color:#6aa56d;font-weight:800;font-size:18px;text-align:center}.tag small{display:block;color:#6b7e6f;font-size:13px;font-weight:600;margin-top:4px}
+.btn{width:100%;padding:18px;border-radius:999px;border:0;font-weight:800;font-size:18px;cursor:pointer;margin-top:14px;transition:.15s}
+.btn-dark{background:#12394c;color:#fff}.btn-green{background:#86bd68;color:#fff}.btn-outline{background:#fff;color:#12394c;border:2.5px solid #12394c}
+.btn:active{transform:scale(.98)}
+.foot{margin-top:18px;text-align:center}.pill{display:inline-block;border:2px solid #9cc196;color:#2d5a32;background:#e8f2e4;padding:10px 18px;border-radius:999px;font-weight:800;font-size:13px}
+.phone{margin-top:14px;font-weight:900;color:#2a3f45;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+.secure{font-size:12px;color:#9aa99f;font-weight:600;margin:18px 0 6px;letter-spacing:.3px}
+</style></head><body>
+<div class="card">
+<div class="logo-wrap"><img src="logo.png" onerror="this.src='https://i.imgur.com/8Km9tLL.png'" alt="KindHeart"><h1>KindHeart</h1><div class="sub">HOMECARE SERVICES</div><div class="tag">💚 Right care at home 💚<small>Compassionate Care. Professional Excellence.</small></div></div>
 
-<div id="s-family" class="space-y-4"><h3 class="font-bold">Family Login - Code + PIN</h3><p class="text-xs text-gray-500">Get Code/PIN from Admin after patient added. Eg FAM1234 + 1234</p><input id="f_code" placeholder="Family Code e.g. FAM1234" class="w-full border rounded-xl p-3.5"><div class="relative"><input id="f_pin" type="password" placeholder="Family PIN" class="w-full border rounded-xl p-3.5"><span onclick="toggle('f_pin')" class="absolute right-3 top-3.5 cursor-pointer">👁️</span></div><button onclick="loginFamily()" class="w-full bg-teal-700 text-white py-3.5 rounded-xl font-bold">Login as Family - Premium Feed</button><p class="text-xs bg-yellow-50 p-3 rounded-xl">Premium: See everything staff does live - vitals, care notes, meds AM/PM green, attending nurse/caregiver, trends, remaining meds, missing supplies.</p></div>
+<button class="btn btn-dark" onclick="location.href='admin.html'">Admin Portal</button>
+<button class="btn btn-green" onclick="location.href='staff.html'">Staff Portal</button>
+<button class="btn btn-outline" onclick="location.href='family.html'">Family Portal</button>
 
-<div id="s-staff" class="hidden space-y-4"><h3 class="font-bold">Staff Login - Phone + PIN</h3><p class="text-xs text-gray-500">Nurse or Caregiver - ERP Portal. Sees only assigned patient.</p><input id="st_phone" placeholder="Phone" class="w-full border rounded-xl p-3.5"><div class="relative"><input id="st_pin" type="password" placeholder="PIN" class="w-full border rounded-xl p-3.5"><span onclick="toggle('st_pin')" class="absolute right-3 top-3.5 cursor-pointer">👁️</span></div><button onclick="loginStaff()" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-bold">Login as Staff - ERP</button><p class="text-xs bg-gray-50 p-3 rounded-xl">ERP: Record vitals, care notes, treatment sheet AM/PM (stays marked today, resets tomorrow), consumables, missing, own history below.</p></div>
-
-<div id="s-admin" class="hidden space-y-4"><h3 class="font-bold">Admin Login</h3><input id="a_user" placeholder="Admin Username - admin" class="w-full border rounded-xl p-3.5"><div class="relative"><input id="a_pass" type="password" placeholder="Password - 0707546365" class="w-full border rounded-xl p-3.5"><span onclick="toggle('a_pass')" class="absolute right-3 top-3.5 cursor-pointer">👁️</span></div><button onclick="loginAdmin()" class="w-full bg-teal-700 text-white py-3.5 rounded-xl font-bold">Login as Admin</button><p class="text-xs text-gray-500">Admin: Staff dropdown Nurse/Caregiver, Patient Code/PIN gen, Meds Duration dropdown, Assign/Reassign/Edit Shift/Unassign, Live Feeds premium.</p></div>
-
-<p id="msg" class="text-sm text-red-600 mt-4 text-center"></p>
+<div class="foot">
+<div class="secure">Secure • Premium • Eldoret & Beyond</div>
+<div class="pill">www.kindhearthomecareservices.co.ke</div>
+<div class="phone">📞 0707546365</div>
 </div>
 </div>
-<script>
-const SB_URL="https://enlvelqeqbmhamyqtzxj.supabase.co"; const SB_KEY="sb_publishable_PIHnwkRKsXvvJjnVQRLx5g_l5SAXbQw"; const sb=supabase.createClient(SB_URL, SB_KEY);
-function tab(n){['family','staff','admin'].forEach(k=>{document.getElementById('s-'+k).classList.add('hidden');document.getElementById('t-'+k).classList.remove('tab-active');document.getElementById('t-'+k).classList.add('bg-gray-100')});document.getElementById('s-'+n).classList.remove('hidden');document.getElementById('t-'+n).classList.add('tab-active');document.getElementById('t-'+n).classList.remove('bg-gray-100');}
-function toggle(id){const e=document.getElementById(id); e.type=e.type==='password'?'text':'password';}
-async function loginFamily(){
- const code=f_code.value.trim().toUpperCase(); const pin=f_pin.value.trim(); if(!code||!pin){msg.innerText='Code + PIN required'; return;}
- msg.innerText='Checking...';
- const {data, error}=await sb.from('patients').select('*').eq('family_code',code).eq('family_pin',pin).maybeSingle();
- if(error){msg.innerText=error.message; return;}
- if(!data){msg.innerText='Wrong Code/PIN - ask Admin'; return;}
- localStorage.setItem('patient_id',data.id); localStorage.setItem('patient_name',data.full_name); localStorage.setItem('role','family');
- location.href='family.html';
-}
-async function loginStaff(){
- const phone=st_phone.value.trim(); const pin=st_pin.value.trim(); if(!phone||!pin){msg.innerText='Phone + PIN required'; return;}
- msg.innerText='Checking staff...';
- const {data, error}=await sb.from('nurses').select('*').eq('phone',phone).eq('pin',pin).eq('is_active',true).maybeSingle();
- if(error){msg.innerText=error.message; return;}
- if(!data){ // fallback search by PIN only if phone fails
-   const {data:d2}=await sb.from('nurses').select('*').eq('pin',pin).maybeSingle();
-   if(!d2){msg.innerText='Wrong Phone/PIN'; return;}
-   localStorage.setItem('nurse_id',d2.id); localStorage.setItem('staff_id',d2.id); localStorage.setItem('nurse_name',d2.full_name); localStorage.setItem('staff_type',d2.staff_type||d2.role); localStorage.setItem('role','staff'); location.href='staff.html'; return;
- }
- localStorage.setItem('nurse_id',data.id); localStorage.setItem('staff_id',data.id); localStorage.setItem('nurse_name',data.full_name); localStorage.setItem('staff_type',data.staff_type||data.role); localStorage.setItem('role','staff');
- location.href='staff.html';
-}
-function loginAdmin(){
- const u=a_user.value.trim().toLowerCase(); const p=a_pass.value.trim();
- if((u==='admin' && p==='0707546365') || (u==='admin' && p==='admin') || (u==='kindheart' && p==='0707546365')){
-  localStorage.setItem('kh_role','admin'); localStorage.setItem('role','admin'); location.href='admin.html';
- } else { msg.innerText='Admin: user admin pass 0707546365'; }
-}
-</script></body></html>
+</body></html>
