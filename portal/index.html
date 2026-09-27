@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KindHeart Portal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<style>
+:root{--green:#0f7a4d;--light:#f6faf8;--red:#d93025;--gray:#666}
+body{margin:0;font-family:system-ui;background:var(--light);color:#222}
+.header{background:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0}
+.logo{display:flex;gap:10px;align-items:center;font-weight:800;color:var(--green);font-size:18px}
+.logo span{width:36px;height:36px;background:var(--green);color:white;border-radius:8px;display:grid;place-items:center}
+.top-links a{margin-left:14px;text-decoration:none;color:var(--green);font-weight:600;font-size:14px}
+.container{max-width:1050px;margin:32px auto;padding:0 16px}
+.hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.card{background:white;border-radius:16px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.06);border:1px solid #e8ecea}
+.card h3{margin:0 0 6px}
+.card p{margin:0 0 14px;color:var(--gray);font-size:13px}
+input{width:100%;padding:12px 14px;border:1px solid #d8ddd9;border-radius:10px;font-size:15px;box-sizing:border-box}
+button{width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;background:var(--green);color:white;font-weight:700;font-size:15px;cursor:pointer}
+button:disabled{opacity:.5}
+.small{font-size:12px;color:var(--gray);margin-top:8px;text-align:center}
+.error{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.badge{display:inline-block;background:#e7f5ee;color:var(--green);padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo"><span>KH</span> KindHeart Homecare</div>
+  <div class="top-links">
+    <a href="tel:0707546365">📞 0707546365</a>
+    <a href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a>
+  </div>
+</div>
+
+<div class="container">
+  <h2 style="margin:0 0 8px">Welcome to KindHeart Portal</h2>
+  <p style="color:#666;margin:0 0 20px">One link for Admin, Staff & Family. PIN only, no email.</p>
+  
+  <div class="hub">
+    <!-- ADMIN -->
+    <div class="card">
+      <span class="badge">ADMIN</span>
+      <h3>Admin Portal</h3>
+      <p>Manage patients, staff, treatment & assignments</p>
+      <input id="adminPin" type="password" placeholder="Enter Admin PIN">
+      <button onclick="loginAdmin()">Enter Admin</button>
+      <div id="adminErr" class="error"></div>
+      <div class="small">Default PIN: 2024 (change in config.js)</div>
+    </div>
+
+    <!-- STAFF -->
+    <div class="card">
+      <span class="badge" style="background:#eef2ff;color:#3a4ad6">STAFF</span>
+      <h3>Staff Portal</h3>
+      <p>Nurses & Caregivers - Document care</p>
+      <input id="staffPin" type="password" placeholder="Enter Staff PIN">
+      <button onclick="loginStaff()">Enter Staff</button>
+      <div id="staffErr" class="error"></div>
+      <div class="small">PIN created by Admin</div>
+    </div>
+
+    <!-- FAMILY -->
+    <div class="card">
+      <span class="badge" style="background:#fff3e0;color:#b45309">FAMILY</span>
+      <h3>Family Portal</h3>
+      <p>View vitals, meds & care in real-time</p>
+      <input id="familyPin" type="text" placeholder="Enter Family Code e.g KH4821">
+      <button onclick="loginFamily()">Enter Family</button>
+      <div id="familyErr" class="error"></div>
+      <div class="small">Premium view - Read only</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function showErr(id,msg){ const e=document.getElementById(id); e.style.display='block'; e.textContent=msg; setTimeout(()=>e.style.display='none',4000); }
+
+function loginAdmin(){
+  const pin = document.getElementById('adminPin').value.trim();
+  if(pin === ADMIN_PIN){ localStorage.setItem('kh_role','admin'); location.href='./admin.html'; }
+  else showErr('adminErr','Wrong Admin PIN');
+}
+
+async function loginStaff(){
+  const pin = document.getElementById('staffPin').value.trim();
+  if(!pin) return showErr('staffErr','Enter PIN');
+  const {data,error} = await supa.from('nurses').select('*').eq('pin',pin).eq('is_active',true).single();
+  if(error||!data) return showErr('staffErr','Staff PIN not found or inactive');
+  localStorage.setItem('kh_role','staff');
+  localStorage.setItem('kh_nurse_id',data.id);
+  localStorage.setItem('kh_nurse_name',data.full_name);
+  location.href='./staff.html';
+}
+
+async function loginFamily(){
+  const code = document.getElementById('familyPin').value.trim().toUpperCase();
+  if(!code) return showErr('familyErr','Enter Family Code');
+  const {data,error} = await supa.from('patients').select('*').or(`family_code.eq.${code},family_pin.eq.${code}`).eq('status','Active').single();
+  if(error||!data) return showErr('familyErr','Family code not found or archived');
+  localStorage.setItem('kh_role','family');
+  localStorage.setItem('kh_patient_id',data.id);
+  localStorage.setItem('kh_patient_name',data.full_name);
+  location.href='./family.html';
+}
+</script>
+</body>
+</html>
