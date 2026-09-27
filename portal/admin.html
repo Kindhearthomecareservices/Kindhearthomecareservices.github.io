@@ -2,59 +2,82 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin - KindHeart Homecare Services</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./config.js"></script>
+<script src="./config.js?v=5"></script>
 <style>
 :root{--green:#0f7a4d;--bg:#f6faf8}body{margin:0;font-family:system-ui;background:var(--bg)}
 .header{background:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
-.logo{display:flex;align-items:center;gap:10px;font-weight:900;color:#153a4d}.logo img{height:32px;width:auto;object-fit:contain}
-.header a{color:#153a4d;text-decoration:none;font-weight:700;margin-left:8px;font-size:12px;background:#e7f5ee;padding:6px 10px;border-radius:20px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;color:#153a4d}.logo img{height:32px}
+.header a{color:#153a4d;text-decoration:none;font-weight:700;margin-left:6px;font-size:12px;background:#e7f5ee;padding:6px 10px;border-radius:20px}
 .tabs{display:flex;gap:8px;padding:10px 16px;overflow:auto;background:#fff;border-bottom:1px solid #eee}
-.tab{padding:8px 14px;border-radius:20px;background:#eef4f0;border:0;cursor:pointer;font-weight:600;white-space:nowrap}.tab.active{background:#153a4d;color:#fff}
-.container{max-width:1200px;margin:16px auto;padding:0 12px;display:grid;grid-template-columns:320px 1fr;gap:14px}@media(max-width:900px){.container{grid-template-columns:1fr}}
-.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:12px}
-input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin:6px 0;box-sizing:border-box}
+.tab{padding:9px 16px;border-radius:20px;background:#eef4f0;border:0;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.tab.active{background:#153a4d;color:#fff}
+.container{max-width:1200px;margin:16px auto;padding:0 12px;display:grid;grid-template-columns:340px 1fr;gap:14px}@media(max-width:900px){.container{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:14px;min-height:40px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;margin:6px 0;box-sizing:border-box}
 input[type=password]{letter-spacing:3px;text-align:center}
-button{padding:10px 14px;border:0;border-radius:8px;background:#153a4d;color:#fff;font-weight:700;cursor:pointer}
-button.out{background:#eee;color:#222} button.danger{background:#d93025}.eye{cursor:pointer;margin-left:6px}
-.list{max-height:520px;overflow:auto}.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
-.badge{padding:3px 8px;border-radius:12px;font-size:11px;background:#e7f5ee;color:var(--green)} .badge.critical{background:#fde8e8;color:#c00}.live{font-size:12px;color:#555}
+button{padding:10px 14px;border:0;border-radius:10px;background:#153a4d;color:#fff;font-weight:700;cursor:pointer}
+button.out{background:#eee;color:#222} button.danger{background:#d93025}
+.row{padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;display:flex;justify-content:space-between;gap:8px}
 </style></head><body>
 <div class="header">
 <div class="logo"><img src="./logo.png"> KindHeart Admin</div>
 <div><a id="phoneLink" href="tel:0707546365">📞 0707546365</a><a id="webLink" href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a><a href="./index.html">Logout</a></div>
 </div>
-<div class="tabs">
-<button class="tab active" onclick="openTab('patients')">Patients</button>
-<button class="tab" onclick="openTab('staff')">Staff</button>
-<button class="tab" onclick="openTab('treatment')">Treatment Sheet</button>
-<button class="tab" onclick="openTab('assign')">Assign + Shift</button>
-<button class="tab" onclick="openTab('feed')">Live Feed</button>
+<div class="tabs" id="tabs">
+<button class="tab active" data-t="patients">Patients</button>
+<button class="tab" data-t="staff">Staff</button>
+<button class="tab" data-t="treatment">Treatment Sheet</button>
+<button class="tab" data-t="assign">Assign + Shift</button>
+<button class="tab" data-t="feed">Live Feed</button>
 </div>
 <div class="container">
-<div><div class="card" id="formCard"></div><div class="card"><h4 style="margin:0 0 8px">All Data</h4><div id="list" class="list"></div></div></div>
-<div><div class="card"><h4 style="margin:0 0 8px" id="detailTitle">Details</h4><div id="detail"></div></div></div>
+<div><div class="card" id="formCard">Loading form...</div><div class="card"><h4 style="margin:0 0 10px">All Data</h4><div id="list">Loading...</div></div></div>
+<div><div class="card"><h4 style="margin:0 0 10px" id="detailTitle">Details</h4><div id="detail">Select tab</div></div></div>
 </div>
 <script>
-const supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-if(localStorage.getItem('kh_role')!=='admin'){location.href='./index.html'}
-// USE YOUR CONFIG CONSTANTS - phone & website from config.js
-document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`;
-document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
-document.getElementById('webLink').href=`https://${ORG_WEBSITE}`;
-document.querySelectorAll('a[href*="0707"]').forEach(a=>a.href=`tel:${ORG_PHONE}`);
+let supa;
+try{
+  supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  document.getElementById('phoneLink').href='tel:'+ORG_PHONE;
+  document.getElementById('phoneLink').innerText='📞 '+ORG_PHONE;
+  document.getElementById('webLink').href='https://'+ORG_WEBSITE;
+}catch(e){ console.log(e); }
+
+if(localStorage.getItem('kh_role')!=='admin'){ location.href='./index.html'; }
 
 let currentTab='patients'; let patients=[], nurses=[], treatments=[];
-function openTab(t){currentTab=t; document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); render();}
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTab=btn.dataset.t;
+    render();
+    if(currentTab==='feed') loadFeed();
+    if(currentTab==='assign') loadAssignList();
+  });
+});
+
 async function loadAll(){
-  patients=(await supa.from('patients').select('*').order('created_at',{ascending:false})).data||[];
-  nurses=(await supa.from('nurses').select('*').order('created_at',{ascending:false})).data||[];
-  treatments=(await supa.from('treatment_sheet').select('*,patients(full_name)').order('created_at',{ascending:false})).data||[];
+  try{
+    const p = await supa.from('patients').select('*').order('created_at',{ascending:false});
+    const n = await supa.from('nurses').select('*').order('created_at',{ascending:false});
+    const t = await supa.from('treatment_sheet').select('*,patients(full_name)').order('created_at',{ascending:false});
+    patients = p.data||[]; nurses = n.data||[]; treatments = t.data||[];
+    if(p.error) console.log('patients error',p.error);
+    if(n.error) console.log('nurses error',n.error);
+    if(t.error) console.log('treatment error',t.error);
+  }catch(err){ console.log('loadAll err',err); patients=[]; nurses=[]; treatments=[]; }
   render();
 }
 loadAll();
-function toggle(id){const e=document.getElementById(id);e.type=e.type==='password'?'text':'password';}
+
+function toggle(id){const e=document.getElementById(id); if(e) e.type=e.type==='password'?'text':'password';}
+function genCode(){const c='KH'+Math.floor(1000+Math.random()*9000); const el=document.getElementById('pf_code'); const el2=document.getElementById('pf_pin'); if(el) el.value=c; if(el2) el2.value=c.replace('KH','');}
+
 function render(){
   const form=document.getElementById('formCard'); const list=document.getElementById('list'); const detT=document.getElementById('detailTitle');
+  if(!form||!list) return;
   if(currentTab==='patients'){
     detT.textContent='Patient Form';
     form.innerHTML=`<h4>Add Patient</h4>
@@ -64,77 +87,47 @@ function render(){
     <input id="pf_allergy" placeholder="Allergies">
     <input id="pf_loc" placeholder="Location">
     <input id="pf_phone" placeholder="Phone">
-    <div style="display:flex;gap:6px;align-items:center"><input id="pf_code" type="password" placeholder="••••" readonly><span class="eye" onclick="toggle('pf_code')">👁️</span><button class="out" onclick="genCode()">Gen</button></div>
-    <div style="display:flex;gap:6px;align-items:center"><input id="pf_pin" type="password" placeholder="••••"><span class="eye" onclick="toggle('pf_pin')">👁️</span></div>
+    <div style="display:flex;gap:6px"><input id="pf_code" type="password" placeholder="••••" readonly><button class="out" onclick="genCode()" type="button">Gen</button><span onclick="toggle('pf_code')" style="cursor:pointer">👁️</span></div>
+    <div style="display:flex;gap:6px"><input id="pf_pin" type="password" placeholder="••••"><span onclick="toggle('pf_pin')" style="cursor:pointer">👁️</span></div>
     <button onclick="addPatient()">Add Patient</button>`;
-    list.innerHTML=patients.map(p=>`<div class="row"><div><b>${p.full_name}</b> (${p.age||''})<br><small>${p.diagnosis||''} | ${p.location||''}<br>Allergy: ${p.allergies||'None'} | <input type="password" value="${p.family_code||''}" style="width:70px;text-align:center;border:0;background:#f5f5f5" readonly> <span class="eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">👁️</span></small></div><div><button class="out" onclick="editPatient('${p.id}')">Edit</button> <button class="danger" onclick="delPatient('${p.id}')">Del</button><br><button class="out" style="margin-top:4px" onclick="archivePatient('${p.id}','${p.status}')">Arch:${p.status}</button></div></div>`).join('');
+    list.innerHTML = patients.length ? patients.map(p=>`<div class="row"><div><b>${p.full_name}</b> (${p.age||''})<br><small>${p.diagnosis||''} | ${p.location||''} | Allergy:${p.allergies||'None'} | ${p.family_code||''}</small></div><div><button class="out" onclick="editPatient('${p.id}')">Edit</button> <button class="danger" onclick="delPatient('${p.id}')">Del</button></div></div>`).join('') : '<small>No patients yet - add above. If you see this, RLS may be blocking. Check Supabase > Table Editor > RLS disabled or add policies.</small>';
   }
   if(currentTab==='staff'){
     detT.textContent='Staff Form';
-    form.innerHTML=`<h4>Add Staff - Full Names + Phone + PIN only</h4>
-    <input id="sf_name" placeholder="Full Names"><input id="sf_phone" placeholder="Phone"><div style="display:flex;gap:6px"><input id="sf_pin" type="password" placeholder="••••" autocomplete="off" inputmode="numeric"><span class="eye" onclick="toggle('sf_pin')">👁️</span></div>
-    <button onclick="addStaff()">Add Staff</button>`;
-    list.innerHTML=nurses.map(n=>`<div class="row"><div><b>${n.full_name}</b><br><small>${n.phone} | <input type="password" value="${n.pin}" style="width:60px;text-align:center;border:0;background:#f5f5f5" readonly> <span class="eye" onclick="this.previousElementSibling.type=this.previousElementSibling.type==='password'?'text':'password'">👁️</span> | ${n.is_active?'Active':'Archived'}</small></div><div><button class="out" onclick="changeStaffPin('${n.id}')">PIN</button> <button class="danger" onclick="delStaff('${n.id}')">Del</button></div></div>`).join('');
+    form.innerHTML=`<h4>Add Staff - Names + Phone + PIN only</h4><input id="sf_name" placeholder="Full Names"><input id="sf_phone" placeholder="Phone"><div style="display:flex;gap:6px"><input id="sf_pin" type="password" placeholder="••••"><span onclick="toggle('sf_pin')" style="cursor:pointer">👁️</span></div><button onclick="addStaff()">Add Staff</button>`;
+    list.innerHTML = nurses.length ? nurses.map(n=>`<div class="row"><div><b>${n.full_name}</b><br><small>${n.phone} | PIN:${n.pin}</small></div><div><button class="danger" onclick="delStaff('${n.id}')">Del</button></div></div>`).join('') : '<small>No staff yet</small>';
   }
   if(currentTab==='treatment'){
-    detT.textContent='Add Treatment Sheet';
-    form.innerHTML=`<h4>Treatment Sheet - OD/BD/TDS/QID/Nocte</h4>
-    <select id="tf_patient">${patients.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('')}</select>
-    <input id="tf_drug" placeholder="Medication"><input id="tf_dose" placeholder="Dose">
-    <select id="tf_freq"><option>OD</option><option>BD</option><option>TDS</option><option>QID</option><option>Nocte</option></select>
-    <input id="tf_duration" placeholder="Duration"><input id="tf_qty" type="number" placeholder="Quantity Given">
-    <button onclick="addTreatment()">Add Treatment</button>`;
-    list.innerHTML=treatments.map(t=>`<div class="row"><div><b>${t.drug_name} ${t.dose}</b> ${t.frequency}<br><small>${t.patients?.full_name||''} | Given:${t.quantity_given} Rem:${t.quantity_remaining} | ${t.duration}</small></div><div><button class="out" onclick="editTreatment('${t.id}')">Edit</button> <button class="danger" onclick="delTreatment('${t.id}')">Del</button></div></div>`).join('');
+    detT.textContent='Treatment Sheet';
+    form.innerHTML=`<h4>Treatment OD/BD/TDS/QID/Nocte</h4><select id="tf_patient">${patients.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('')}</select><input id="tf_drug" placeholder="Drug"><input id="tf_dose" placeholder="Dose"><select id="tf_freq"><option>OD</option><option>BD</option><option>TDS</option><option>QID</option><option>Nocte</option></select><input id="tf_duration" placeholder="Duration"><input id="tf_qty" type="number" placeholder="Qty Given"><button onclick="addTreatment()">Add</button>`;
+    list.innerHTML = treatments.length ? treatments.map(t=>`<div class="row"><div><b>${t.drug_name} ${t.dose||''}</b> ${t.frequency}<br><small>${t.patients?.full_name||''} | Given:${t.quantity_given} Rem:${t.quantity_remaining}</small></div></div>`).join('') : '<small>No treatments</small>';
   }
   if(currentTab==='assign'){
-    detT.textContent='Assign Patient + Shift Type';
-    form.innerHTML=`<h4>Match Right Staff to Patient</h4>
-    <select id="af_patient">${patients.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('')}</select>
-    <select id="af_nurse">${nurses.map(n=>`<option value="${n.id}">${n.full_name} - ${n.phone}</option>`).join('')}</select>
-    <select id="af_shift"><option>Live-in</option><option>Day Shift</option><option>Night Shift</option><option>Hospital Assignment</option></select>
-    <button onclick="assign()">Assign</button>`; loadAssignList();
+    detT.textContent='Assign Patient + Shift';
+    form.innerHTML=`<h4>Assign</h4><select id="af_patient">${patients.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('')}</select><select id="af_nurse">${nurses.map(n=>`<option value="${n.id}">${n.full_name}</option>`).join('')}</select><select id="af_shift"><option>Live-in</option><option>Day Shift</option><option>Night Shift</option><option>Hospital Assignment</option></select><button onclick="assign()">Assign</button>`;
+    list.innerHTML='<small>Loading assignments...</small>'; loadAssignList();
   }
-  if(currentTab==='feed'){detT.textContent='Live Feeds'; form.innerHTML='<button onclick="loadFeed()">Refresh Live Feed</button>'; loadFeed();}
+  if(currentTab==='feed'){
+    detT.textContent='Live Feed'; form.innerHTML='<button onclick="loadFeed()">Refresh Live Feed</button><div style="font-size:11px;margin-top:8px">O2 90-100 Normal, Sugar mmol/L</div>'; 
+    document.getElementById('detail').innerHTML='Loading feed...'; loadFeed();
+  }
 }
-function genCode(){document.getElementById('pf_code').value='KH'+Math.floor(1000+Math.random()*9000); const c=document.getElementById('pf_code').value; document.getElementById('pf_pin').value=c.replace('KH','');}
+
 async function addPatient(){
-  const full_name=document.getElementById('pf_name').value.trim(); const age=parseInt(document.getElementById('pf_age').value)||null;
-  const diagnosis=document.getElementById('pf_diag').value; const allergies=document.getElementById('pf_allergy').value;
-  const location=document.getElementById('pf_loc').value; const phone=document.getElementById('pf_phone').value;
-  const family_code=document.getElementById('pf_code').value.trim().toUpperCase(); const family_pin=document.getElementById('pf_pin').value.trim();
-  if(!full_name||!family_code||!family_pin) return alert('Names, Code, PIN required');
-  const {error}=await supa.from('patients').insert({full_name,age,diagnosis,allergies,location,phone,family_code,family_pin}); if(error) alert(error.message); else loadAll();
+  const payload={full_name:document.getElementById('pf_name').value.trim(),age:parseInt(document.getElementById('pf_age').value)||null,diagnosis:document.getElementById('pf_diag').value,allergies:document.getElementById('pf_allergy').value,location:document.getElementById('pf_loc').value,phone:document.getElementById('pf_phone').value,family_code:document.getElementById('pf_code').value.toUpperCase(),family_pin:document.getElementById('pf_pin').value.trim()};
+  if(!payload.full_name||!payload.family_code) return alert('Names + Code required');
+  const {error}=await supa.from('patients').insert(payload); if(error) alert(error.message); else loadAll();
 }
-async function delPatient(id){if(!confirm('Delete patient?'))return; await supa.from('patients').delete().eq('id',id); loadAll();}
-async function archivePatient(id,status){const ns=status==='Active'?'Archived':'Active'; await supa.from('patients').update({status:ns}).eq('id',id); loadAll();}
-async function editPatient(id){const p=patients.find(x=>x.id===id); const nn=prompt('Full Names',p.full_name); if(nn===null)return; const nd=prompt('Diagnosis',p.diagnosis); const na=prompt('Allergies',p.allergies); const nl=prompt('Location',p.location); const nc=prompt('Family Code',p.family_code); const np=prompt('Family PIN',p.family_pin); await supa.from('patients').update({full_name:nn||p.full_name,diagnosis:nd,allergies:na,location:nl,family_code:nc,family_pin:np}).eq('id',id); loadAll();}
-async function addStaff(){const full_name=document.getElementById('sf_name').value.trim(); const phone=document.getElementById('sf_phone').value.trim(); const pin=document.getElementById('sf_pin').value.trim(); if(!full_name||!phone||!pin) return alert('All fields required'); const {error}=await supa.from('nurses').insert({full_name,phone,pin}); if(error) alert(error.message); else loadAll();}
-async function delStaff(id){if(!confirm('Delete staff?'))return; await supa.from('nurses').delete().eq('id',id); loadAll();}
-async function changeStaffPin(id){const n=prompt('New PIN - hidden input'); if(!n)return; await supa.from('nurses').update({pin:n}).eq('id',id); loadAll();}
-async function addTreatment(){
-  const patient_id=document.getElementById('tf_patient').value; const drug_name=document.getElementById('tf_drug').value.trim();
-  const dose=document.getElementById('tf_dose').value; const frequency=document.getElementById('tf_freq').value; const duration=document.getElementById('tf_duration').value;
-  const quantity_given=parseInt(document.getElementById('tf_qty').value)||0; const quantity_remaining=quantity_given;
-  if(!drug_name) return alert('Drug name'); const {error}=await supa.from('treatment_sheet').insert({patient_id,drug_name,dose,frequency,duration,quantity_given,quantity_remaining}); if(error) alert(error.message); else loadAll();
-}
-async function delTreatment(id){if(!confirm('Delete?'))return; await supa.from('treatment_sheet').delete().eq('id',id); loadAll();}
-async function editTreatment(id){const t=treatments.find(x=>x.id===id); const nd=prompt('Drug',t.drug_name); const nf=prompt('Frequency OD/BD/TDS/QID/Nocte',t.frequency); const nq=prompt('Qty Remaining',t.quantity_remaining); await supa.from('treatment_sheet').update({drug_name:nd||t.drug_name,frequency:nf||t.frequency,quantity_remaining:parseInt(nq)||t.quantity_remaining}).eq('id',id); loadAll();}
-async function assign(){const patient_id=document.getElementById('af_patient').value; const nurse_id=document.getElementById('af_nurse').value; const shift_type=document.getElementById('af_shift').value; const {error}=await supa.from('patient_staff').insert({patient_id,nurse_id,shift_type}); if(error) alert(error.message); else{alert('Assigned '+shift_type); loadAssignList();}}
-async function loadAssignList(){const {data}=await supa.from('patient_staff').select('*,patients(full_name),nurses(full_name)').order('assigned_at',{ascending:false}).limit(20); document.getElementById('list').innerHTML=(data||[]).map(a=>`<div class="row"><div><b>${a.patients?.full_name}</b> → ${a.nurses?.full_name}<br><small>${a.shift_type} | ${a.is_active?'Active':'Archived'}</small></div><div><button class="danger" onclick="unassign('${a.id}')">Remove</button></div></div>`).join('');}
-async function unassign(id){await supa.from('patient_staff').delete().eq('id',id); loadAssignList();}
+async function delPatient(id){ if(!confirm('Delete?'))return; await supa.from('patients').delete().eq('id',id); loadAll(); }
+async function editPatient(id){ const p=patients.find(x=>x.id===id); const nn=prompt('Full Names',p.full_name); if(nn===null)return; await supa.from('patients').update({full_name:nn}).eq('id',id); loadAll(); }
+async function addStaff(){ const full_name=document.getElementById('sf_name').value.trim(); const phone=document.getElementById('sf_phone').value.trim(); const pin=document.getElementById('sf_pin').value.trim(); if(!full_name||!phone||!pin) return alert('All required'); const {error}=await supa.from('nurses').insert({full_name,phone,pin}); if(error) alert(error.message); else loadAll(); }
+async function delStaff(id){ if(!confirm('Delete?'))return; await supa.from('nurses').delete().eq('id',id); loadAll(); }
+async function addTreatment(){ const patient_id=document.getElementById('tf_patient').value; const drug_name=document.getElementById('tf_drug').value.trim(); const dose=document.getElementById('tf_dose').value; const frequency=document.getElementById('tf_freq').value; const duration=document.getElementById('tf_duration').value; const quantity_given=parseInt(document.getElementById('tf_qty').value)||0; const {error}=await supa.from('treatment_sheet').insert({patient_id,drug_name,dose,frequency,duration,quantity_given,quantity_remaining:quantity_given}); if(error) alert(error.message); else loadAll(); }
+async function assign(){ const patient_id=document.getElementById('af_patient').value; const nurse_id=document.getElementById('af_nurse').value; const shift_type=document.getElementById('af_shift').value; const {error}=await supa.from('patient_staff').insert({patient_id,nurse_id,shift_type}); if(error) alert(error.message); else{ alert('Assigned '+shift_type); loadAssignList(); } }
+async function loadAssignList(){ const {data}=await supa.from('patient_staff').select('*,patients(full_name),nurses(full_name)').order('assigned_at',{ascending:false}).limit(20); document.getElementById('list').innerHTML=(data||[]).map(a=>`<div class="row"><div><b>${a.patients?.full_name}</b> → ${a.nurses?.full_name}<br><small>${a.shift_type}</small></div></div>`).join('')||'No assignments'; }
 async function loadFeed(){
-  const list=document.getElementById('list'); list.innerHTML='Loading...';
-  const v=(await supa.from('vitals').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(15)).data||[];
-  const c=(await supa.from('care_notes').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(15)).data||[];
-  const m=(await supa.from('medication_given').select('*,patients(full_name),nurses(full_name),treatment_sheet(drug_name)').order('created_at',{ascending:false}).limit(15)).data||[];
-  const miss=(await supa.from('missing_reports').select('*,patients(full_name)').order('created_at',{ascending:false}).limit(15)).data||[];
-  document.getElementById('detail').innerHTML=`
-  <h4>Vitals (Real-time) - O2 90-100 Normal, Sugar mmol/L</h4>
-  ${v.map(x=>`<div class="live" style="padding:8px;border-bottom:1px solid #eee"><b>${x.patients?.full_name}</b> - BP ${x.bp_systolic||'-'}/${x.bp_diastolic||'-'} | Temp ${x.temperature||'-'} | Pulse ${x.pulse||'-'} | O2 ${x.oxygen||'-'}% | Sugar ${x.blood_sugar||'-'} mmol/L | <span class="badge ${x.is_abnormal?'critical':''}">${x.severity} ${x.abnormal_flags||''}</span><br><small>by ${x.nurses?.full_name||''} at ${new Date(x.created_at).toLocaleString()}</small></div>`).join('')}
-  <h4 style="margin-top:16px">Care Notes</h4>${c.map(x=>`<div class="live">${x.patients?.full_name}: ${x.note}<br><small>${x.nurses?.full_name}</small></div>`).join('')}
-  <h4 style="margin-top:16px">Meds Given</h4>${m.map(x=>`<div class="live">${x.patients?.full_name} - ${x.treatment_sheet?.drug_name||'Med'} given by ${x.nurses?.full_name} at ${new Date(x.time_given).toLocaleString()}</div>`).join('')}
-  <h4 style="margin-top:16px">Missing Reports</h4>${miss.map(x=>`<div class="live">⚠️ ${x.patients?.full_name} needs ${x.item_name} - ${x.urgency}<br>${x.notes||''}</div>`).join('')}
-  `;
-  list.innerHTML='<div style="font-size:12px">Live feed loaded - '+ORG_WEBSITE+'</div>';
+  const v=(await supa.from('vitals').select('*,patients(full_name),nurses(full_name)').order('created_at',{ascending:false}).limit(10)).data||[];
+  document.getElementById('detail').innerHTML = v.length ? v.map(x=>`<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px"><b>${x.patients?.full_name}</b> - O2 ${x.oxygen}% | Sugar ${x.blood_sugar} mmol/L | BP ${x.bp_systolic}/${x.bp_diastolic} | ${new Date(x.created_at).toLocaleString()}</div>`).join('') : 'No vitals yet';
+  document.getElementById('list').innerHTML='Feed loaded - '+(v.length)+' records';
 }
 </script></body></html>
