@@ -21,7 +21,7 @@ button.out{background:#eee;color:#222} button.danger{background:#d93025}.eye{cur
 </style></head><body>
 <div class="header">
 <div class="logo"><img src="./logo.png"> KindHeart Admin</div>
-<div><a href="tel:0707546365">📞 0707546365</a><a href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a><a href="./index.html">Logout</a></div>
+<div><a id="phoneLink" href="tel:0707546365">📞 0707546365</a><a id="webLink" href="https://kindhearthomecareservices.co.ke" target="_blank">🌐 Website</a><a href="./index.html">Logout</a></div>
 </div>
 <div class="tabs">
 <button class="tab active" onclick="openTab('patients')">Patients</button>
@@ -37,6 +37,12 @@ button.out{background:#eee;color:#222} button.danger{background:#d93025}.eye{cur
 <script>
 const supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 if(localStorage.getItem('kh_role')!=='admin'){location.href='./index.html'}
+// USE YOUR CONFIG CONSTANTS - phone & website from config.js
+document.getElementById('phoneLink').href=`tel:${ORG_PHONE}`;
+document.getElementById('phoneLink').textContent=`📞 ${ORG_PHONE}`;
+document.getElementById('webLink').href=`https://${ORG_WEBSITE}`;
+document.querySelectorAll('a[href*="0707"]').forEach(a=>a.href=`tel:${ORG_PHONE}`);
+
 let currentTab='patients'; let patients=[], nurses=[], treatments=[];
 function openTab(t){currentTab=t; document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); render();}
 async function loadAll(){
@@ -129,6 +135,6 @@ async function loadFeed(){
   <h4 style="margin-top:16px">Meds Given</h4>${m.map(x=>`<div class="live">${x.patients?.full_name} - ${x.treatment_sheet?.drug_name||'Med'} given by ${x.nurses?.full_name} at ${new Date(x.time_given).toLocaleString()}</div>`).join('')}
   <h4 style="margin-top:16px">Missing Reports</h4>${miss.map(x=>`<div class="live">⚠️ ${x.patients?.full_name} needs ${x.item_name} - ${x.urgency}<br>${x.notes||''}</div>`).join('')}
   `;
-  list.innerHTML='<div style="font-size:12px">Live feed loaded</div>';
+  list.innerHTML='<div style="font-size:12px">Live feed loaded - '+ORG_WEBSITE+'</div>';
 }
 </script></body></html>
